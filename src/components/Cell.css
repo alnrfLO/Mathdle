@@ -1,44 +1,46 @@
 .cell {
-  width: clamp(30px, 8vw, 46px);
-  height: clamp(38px, 9vw, 54px);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: var(--cell);
+  width: clamp(26px, 7.5vw, 38px);
+  height: clamp(32px, 8vw, 44px);
+  border: 1px solid rgba(41, 51, 31, 0.3);
+  border-radius: 2px;
+  background: var(--screen-bg-deep);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(1rem, 3vw, 1.25rem);
-  font-weight: 500;
+  font-family: var(--font-screen);
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
   color: var(--ink);
   transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .cell--token {
   width: auto;
-  min-width: 34px;
-  height: clamp(34px, 7vw, 42px);
-  padding: 0 8px;
-  font-size: clamp(0.68rem, 2vw, 0.8rem);
+  min-width: 30px;
+  height: clamp(28px, 6vw, 34px);
+  padding: 0 6px;
+  font-size: clamp(0.85rem, 2.4vw, 1rem);
 }
 
 .cell--filled {
   border-color: var(--ink-dim);
+  background: var(--screen-bg);
 }
 
 .cell--correct {
   background: var(--state-correct);
   border-color: var(--state-correct);
-  color: #0e1a13;
+  color: var(--screen-bg);
 }
 
 .cell--present {
   background: var(--state-present);
   border-color: var(--state-present);
-  color: #241a06;
+  color: var(--screen-bg);
 }
 
 .cell--absent {
   background: var(--state-absent);
   border-color: var(--state-absent);
-  color: var(--ink-dim);
+  color: var(--screen-bg);
+  opacity: 0.85;
 }

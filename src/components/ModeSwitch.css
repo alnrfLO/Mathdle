@@ -1,42 +1,42 @@
 .mode-switch {
   display: flex;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid rgba(41, 51, 31, 0.3);
+  border-radius: 3px;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .mode-btn {
   flex: 1;
-  background: var(--panel);
+  background: var(--screen-bg-deep);
   color: var(--ink-dim);
   border: none;
-  font-family: inherit;
-  font-size: clamp(0.76rem, 2vw, 0.86rem);
-  padding: 10px 6px;
+  font-family: var(--font-mono);
+  font-size: clamp(0.66rem, 2vw, 0.74rem);
+  font-weight: 600;
+  padding: 6px 6px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.12s ease;
 }
 
 .mode-btn:not(:disabled):hover {
-  background: var(--panel-hover);
+  background: var(--screen-bg);
 }
 
 .mode-btn--active {
-  background: var(--chalk-blue);
-  color: #10201c;
-  font-weight: 700;
+  background: var(--ink);
+  color: var(--screen-bg);
 }
 
 .mode-btn--active:hover {
-  background: var(--chalk-blue);
+  background: var(--ink);
 }
 
 .mode-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .mode-btn + .mode-btn {
-  border-left: 1px solid var(--border);
+  border-left: 1px solid rgba(41, 51, 31, 0.3);
 }

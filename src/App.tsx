@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { Header } from "./components/Header";
-import { DifficultyTabs } from "./components/DifficultyTabs";
+import { SoftkeyTabs } from "./components/SoftkeyTabs";
 import { ModeSwitch } from "./components/ModeSwitch";
 import { InfoPanel } from "./components/InfoPanel";
 import { Grid } from "./components/Grid";
@@ -15,7 +14,8 @@ function App() {
   const { level, mode, streak, setLevel, setMode, newGame, classique, cible } = useMathdle();
 
   const isSymbolic = level === "impossible";
-  const levelCfg = mode === "classique" ? LEVELS[level] : LEVELS[level === "impossible" ? "difficile" : level];
+  const levelCfg =
+    mode === "classique" ? LEVELS[level] : LEVELS[level === "impossible" ? "difficile" : level];
 
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
@@ -40,85 +40,84 @@ function App() {
   }, [mode, isSymbolic, classique, cible]);
 
   return (
-    <div className="app-shell">
-      <Header streak={streak} />
-
-      <main className="app-main">
-        <DifficultyTabs level={level} onChange={setLevel} />
-        <ModeSwitch mode={mode} disabled={isSymbolic} onChange={setMode} />
-
-        <div className="mobile-only">
-          <InfoPanel mode={mode} level={level} />
+    <div className="scene">
+      <div className="calculator">
+        <div className="calculator__brandrow">
+          <span className="calculator__brand">MATHDLE-92</span>
+          <span className="calculator__streak">
+            SÉRIE <strong>{streak}</strong>
+          </span>
         </div>
 
-        {mode === "classique" ? (
-          <div className="play-area">
-            <div className={"message" + (classique.message.variant ? ` message--${classique.message.variant}` : "")}>
-              {classique.message.text}
-            </div>
-            <Grid
-              target={classique.target}
-              rows={classique.rows}
-              currentGuess={classique.currentGuess}
-              rowIndex={classique.rowIndex}
-              maxAttempts={classique.maxAttempts}
-              isSymbolic={isSymbolic}
-              shakeRow={classique.shakeRow}
-              popRow={classique.popRow}
-            />
-            {classique.showBanner && (
-              <Banner
-                won={classique.won}
-                target={classique.target}
-                isSymbolic={isSymbolic}
-                onNewGame={newGame}
+        <div className="calculator__screen-frame">
+          <div className="calculator__screen">
+            <SoftkeyTabs level={level} onChange={setLevel} />
+            <ModeSwitch mode={mode} disabled={isSymbolic} onChange={setMode} />
+
+            {mode === "classique" ? (
+              <div className="play-area">
+                <div
+                  className={
+                    "message" +
+                    (classique.message.variant ? ` message--${classique.message.variant}` : "")
+                  }
+                >
+                  {classique.message.text}
+                </div>
+                <Grid
+                  target={classique.target}
+                  rows={classique.rows}
+                  currentGuess={classique.currentGuess}
+                  rowIndex={classique.rowIndex}
+                  maxAttempts={classique.maxAttempts}
+                  isSymbolic={isSymbolic}
+                  shakeRow={classique.shakeRow}
+                  popRow={classique.popRow}
+                />
+                {classique.showBanner && (
+                  <Banner
+                    won={classique.won}
+                    target={classique.target}
+                    isSymbolic={isSymbolic}
+                    onNewGame={newGame}
+                  />
+                )}
+              </div>
+            ) : (
+              <CibleLibre
+                target={cible.target}
+                input={cible.input}
+                config={cible.config}
+                message={cible.message}
+                onClear={cible.clear}
+                onCheck={cible.check}
               />
             )}
+
+            <div className="screen-only-info">
+              <InfoPanel mode={mode} level={level} />
+            </div>
           </div>
-        ) : (
-          <CibleLibre
-            target={cible.target}
-            input={cible.input}
-            config={cible.config}
-            message={cible.message}
-            onClear={cible.clear}
-            onCheck={cible.check}
-          />
-        )}
-
-        <div className="mobile-keyboard">
-          <Keyboard
-            opKeys={levelCfg.keys}
-            extraKeys={mode === "classique" ? levelCfg.extraKeys : undefined}
-            onKey={mode === "classique" ? classique.typeChar : cible.typeChar}
-            onBackspace={mode === "classique" ? classique.backspace : cible.backspace}
-            onSubmit={mode === "classique" ? classique.submitGuess : cible.check}
-            submitLabel={mode === "classique" ? "Valider" : "OK"}
-          />
         </div>
-      </main>
 
-      <aside className="app-sidebar">
+        <Keyboard
+          opKeys={levelCfg.keys}
+          extraKeys={mode === "classique" ? levelCfg.extraKeys : undefined}
+          onKey={mode === "classique" ? classique.typeChar : cible.typeChar}
+          onBackspace={mode === "classique" ? classique.backspace : cible.backspace}
+          onSubmit={mode === "classique" ? classique.submitGuess : cible.check}
+          submitLabel={mode === "classique" ? "Valider" : "OK"}
+        />
+      </div>
+
+      <aside className="desk-note">
+        <p className="desk-note__pin">📌</p>
+        <h2>Aide-mémoire</h2>
         <InfoPanel mode={mode} level={level} />
-        <div className="sidebar-keyboard">
-          <p className="sidebar-keyboard__hint">
-            Tu peux aussi utiliser ton clavier physique — chiffres, opérateurs, Entrée, Retour
-            arrière.
-          </p>
-          <Keyboard
-            opKeys={levelCfg.keys}
-            extraKeys={mode === "classique" ? levelCfg.extraKeys : undefined}
-            onKey={mode === "classique" ? classique.typeChar : cible.typeChar}
-            onBackspace={mode === "classique" ? classique.backspace : cible.backspace}
-            onSubmit={mode === "classique" ? classique.submitGuess : cible.check}
-            submitLabel={mode === "classique" ? "Valider" : "OK"}
-          />
-        </div>
+        <p className="desk-note__footer">
+          Mathdle — fait pour s'entraîner, pas pour tricher en cours.
+        </p>
       </aside>
-
-      <footer className="app-footer">
-        Mathdle — fait pour s'entraîner, pas pour tricher en cours.
-      </footer>
     </div>
   );
 }

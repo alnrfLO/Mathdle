@@ -1,7 +1,8 @@
 .keyboard {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
+  padding: 14px 10px 4px;
 }
 
 .kb-row {
@@ -13,53 +14,56 @@
 
 .key {
   flex: 1;
-  max-width: clamp(36px, 8vw, 48px);
-  height: clamp(42px, 9vw, 52px);
-  background: var(--panel);
-  border: 1px solid var(--border);
+  max-width: clamp(38px, 8vw, 52px);
+  height: clamp(38px, 8vw, 48px);
+  background: var(--key-num);
+  border: none;
   border-radius: 6px;
-  color: var(--ink);
-  font-family: inherit;
-  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  color: var(--key-num-text);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: clamp(0.82rem, 2.4vw, 0.95rem);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  transition: background 0.12s ease, transform 0.08s ease;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
 }
 
 .key:hover {
-  background: var(--panel-hover);
+  filter: brightness(1.05);
 }
 
 .key:active {
-  background: var(--border);
-  transform: scale(0.96);
+  transform: translateY(2px);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .key--op {
-  color: var(--chalk-blue);
+  background: var(--key-op);
+  color: var(--key-text-light);
 }
 
 .key--symbol {
-  color: var(--danger);
-  font-size: clamp(0.6rem, 1.8vw, 0.7rem);
-  max-width: 60px;
+  background: var(--key-mode);
+  color: var(--key-text-light);
+  font-size: clamp(0.56rem, 1.7vw, 0.64rem);
+  max-width: 58px;
 }
 
 .key--wide {
-  max-width: 100px;
-  font-size: clamp(0.7rem, 2vw, 0.78rem);
+  max-width: 96px;
+  font-size: clamp(0.68rem, 2vw, 0.76rem);
 }
 
 .key--enter {
-  background: var(--chalk-yellow);
-  color: #241a06;
-  font-weight: 700;
-  border-color: var(--chalk-yellow);
+  background: var(--key-enter);
+  color: var(--key-text-light);
 }
 
-.key--enter:hover {
-  background: #f3d372;
+.key--wide:not(.key--enter) {
+  background: var(--key-clear);
+  color: var(--key-text-light);
 }

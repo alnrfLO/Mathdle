@@ -16,23 +16,13 @@ interface CibleLibreProps {
 export function CibleLibre({ target, input, config, message, onClear, onCheck }: CibleLibreProps) {
   return (
     <div className="cible">
-      <div className="target-frame">
-        <svg className="target-frame__circle" viewBox="0 0 120 120" aria-hidden="true">
-          <path
-            d="M60,4 C90,4 116,26 116,60 C116,94 92,116 59,116 C27,116 4,93 4,59 C4,27 29,4 60,4 Z"
-            fill="none"
-            stroke="var(--chalk-yellow)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-        </svg>
-        <div className="target-frame__num">{target}</div>
-        <div className="target-frame__label">à atteindre</div>
+      <div className="target-readout">
+        <span className="target-readout__label">CIBLE</span>
+        <span className="target-readout__num">{target}</span>
       </div>
 
       <p className="constraint">
-        Utilise exactement <b>{config.length}</b> caractères. Opérateurs autorisés :{" "}
-        <b>{config.keys.join(" ")}</b>
+        {config.length} caractères · <b>{config.keys.join(" ")}</b>
       </p>
 
       <div className="cible-input">

@@ -1,83 +1,78 @@
-.target-frame {
-  position: relative;
-  width: clamp(100px, 24vw, 130px);
-  height: clamp(100px, 24vw, 130px);
-  margin: 6px auto 18px;
+.target-readout {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
-  flex-direction: column;
+  gap: 10px;
+  background: var(--screen-bg-deep);
+  border: 1px solid rgba(41, 51, 31, 0.3);
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin: 4px auto 14px;
+  width: fit-content;
 }
 
-.target-frame__circle {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.target-frame__num {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 2.6rem);
-  color: var(--chalk-yellow);
-  line-height: 1;
-}
-
-.target-frame__label {
-  font-size: 0.62rem;
+.target-readout__label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
   color: var(--ink-dim);
-  margin-top: 2px;
+}
+
+.target-readout__num {
+  font-family: var(--font-screen);
+  font-size: clamp(2rem, 6vw, 2.5rem);
+  color: var(--ink);
+  line-height: 1;
 }
 
 .constraint {
   text-align: center;
-  font-size: clamp(0.74rem, 2vw, 0.82rem);
+  font-size: clamp(0.68rem, 1.8vw, 0.76rem);
   color: var(--ink-dim);
-  margin: 0 0 16px;
+  margin: 0 0 12px;
 }
 
 .constraint b {
-  color: var(--chalk-blue);
+  color: var(--ink);
 }
 
 .cible-input {
   display: flex;
   gap: 6px;
   justify-content: center;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
 .cible-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .cible-btn {
-  font-family: inherit;
-  font-size: clamp(0.76rem, 2vw, 0.86rem);
-  padding: 10px 20px;
-  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: clamp(0.68rem, 1.8vw, 0.76rem);
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 4px;
   cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--panel);
+  border: 1px solid rgba(41, 51, 31, 0.3);
+  background: var(--screen-bg-deep);
   color: var(--ink);
-  transition: background 0.15s ease;
 }
 
 .cible-btn:hover {
-  background: var(--panel-hover);
+  background: var(--screen-bg);
 }
 
 .cible-btn--primary {
-  background: var(--chalk-blue);
-  border-color: var(--chalk-blue);
-  color: #10201c;
-  font-weight: 700;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--screen-bg);
 }
 
 .cible-btn--primary:hover {
-  background: #8fcedf;
+  opacity: 0.85;
 }
