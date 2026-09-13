@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Mathdle — devine l'équation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16221d;
+    --panel: #1e2c26;
+    --cell: #23342c;
+    --border: #3a4a42;
+    --border-soft: #2c3b34;
+    --ink: #f2f0e6;
+    --ink-dim: #93a89d;
+    --chalk-yellow: #f0c85f;
+    --chalk-blue: #7fc4d9;
+    --state-correct: #7fae6a;
+    --state-present: #d9a441;
+    --state-absent: #364840;
+    --danger: #d9705a;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      linear-gradient(var(--border-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+    background-color: var(--bg);
+  }
+
+  .wrap {
+    max-width: 460px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+  }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .title-block h1 {
+    font-family: 'Kalam', cursive;
+    font-size: 2.1rem;
+    margin: 0;
+    color: var(--chalk-yellow);
+    line-height: 1;
+    position: relative;
+    display: inline-block;
+  }
+
+  .title-block h1 .underline {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    bottom: -6px;
+    height: 6px;
+  }
+
+  .title-block p {
+    margin: 8px 0 0;
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.2px;
+  }
+
+  .stats {
+    text-align: right;
+    font-size: 0.72rem;
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+  .stats strong {
+    color: var(--chalk-blue);
+    font-size: 0.95rem;
+    display: block;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+    padding-bottom: 0;
+    flex-wrap: wrap;
+  }
+  .tab {
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-family: inherit;
+    font-size: 0.86rem;
+    padding: 6px 2px 10px;
+    cursor: pointer;
+    position: relative;
+  }
+  .tab.active {
+    color: var(--ink);
+  }
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    background: var(--chalk-yellow);
+  }
+  .tab.impossible.active {
+    color: var(--danger);
+  }
+  .tab.impossible.active::after {
+    background: var(--danger);
+  }
+
+  .mode-switch {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .mode-btn {
+    flex: 1;
+    background: var(--panel);
+    color: var(--ink-dim);
+    border: none;
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 10px 6px;
+    cursor: pointer;
+  }
+  .mode-btn.active {
+    background: var(--chalk-blue);
+    color: #10201c;
+    font-weight: 700;
+  }
+  .mode-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .mode-btn + .mode-btn { border-left: 1px solid var(--border); }
+
+  .info-toggle {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .info-toggle button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+  .info-box {
+    display: none;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.76rem;
+    color: var(--ink-dim);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .info-box.open { display: block; }
+  .info-box b { color: var(--ink); }
+
+  #classique-area { display: none; }
+  #classique-area.active { display: block; }
+
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .grid-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+  .grid-row.wrap-row {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .cell {
+    width: 34px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--cell);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--ink);
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .cell.token {
+    width: auto;
+    min-width: 30px;
+    padding: 0 5px;
+    font-size: 0.68rem;
+  }
+  .cell.filled { border-color: var(--ink-dim); }
+  .cell.correct { background: var(--state-correct); border-color: var(--state-correct); color: #0e1a13; }
+  .cell.present { background: var(--state-present); border-color: var(--state-present); color: #241a06; }
+  .cell.absent { background: var(--state-absent); border-color: var(--state-absent); color: var(--ink-dim); }
+  .grid-row.shake { animation: shake 0.35s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .grid-row.pop .cell { animation: pop 0.25s ease; }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  .message {
+    text-align: center;
+    min-height: 20px;
+    font-size: 0.8rem;
+    color: var(--danger);
+    margin-bottom: 10px;
+  }
+  .message.success { color: var(--state-correct); }
+
+  .banner {
+    display: none;
+    background: var(--panel);
+    border: 1px solid var(--chalk-yellow);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .banner.show { display: block; }
+  .banner h3 {
+    font-family: 'Kalam', cursive;
+    margin: 0 0 6px;
+    font-size: 1.3rem;
+  }
+  .banner p { margin: 0 0 10px; font-size: 0.82rem; color: var(--ink-dim); word-break: break-word; }
+  .banner button {
+    background: var(--chalk-yellow);
+    color: #241a06;
+    border: none;
+    font-family: inherit;
+    font-weight: 700;
+    padding: 9px 20px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+
+  #cible-area { display: none; }
+  #cible-area.active { display: block; }
+
+  .target-frame {
+    width: 110px;
+    height: 110px;
+    margin: 6px auto 16px;
+    border: 3px solid var(--chalk-yellow);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .target-frame .num {
+    font-family: 'Kalam', cursive;
+    font-size: 2.4rem;
+    color: var(--chalk-yellow);
+    line-height: 1;
+  }
+  .target-frame .lbl {
+    font-size: 0.6rem;
+    color: var(--ink-dim);
+    margin-top: 2px;
+  }
+
+  .constraint {
+    text-align: center;
+    font-size: 0.76rem;
+    color: var(--ink-dim);
+    margin-bottom: 14px;
+  }
+  .constraint b { color: var(--chalk-blue); }
+
+  .cible-input {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .cible-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  .cible-actions button {
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--ink);
+  }
+  .cible-actions button.primary {
+    background: var(--chalk-blue);
+    border-color: var(--chalk-blue);
+    color: #10201c;
+    font-weight: 700;
+  }
+
+  .keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .kb-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .key {
+    flex: 1;
+    max-width: 40px;
+    height: 46px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .key:active { background: var(--border); }
+  .key.op { color: var(--chalk-blue); }
+  .key.symbol { color: var(--danger); font-size: 0.68rem; max-width: 54px; }
+  .key.wide { max-width: 90px; font-size: 0.7rem; }
+  .key.enter { background: var(--chalk-yellow); color: #241a06; font-weight: 700; border-color: var(--chalk-yellow); }
+
+  footer {
+    text-align: center;
+    margin-top: 26px;
+    font-size: 0.68rem;
+    color: var(--border);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-block">
+      <h1>Mathdle
+        <svg class="underline" viewBox="0 0 140 10" preserveAspectRatio="none"><path d="M2,6 C 30,2 60,9 80,5 C 100,2 120,7 138,4" stroke="#f0c85f" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
+      </h1>
+      <p>Devine l'équation, chiffre par chiffre.</p>
+    </div>
+    <div class="stats">
+      <span id="stat-label">Série</span>
+      <strong id="stat-value">0</strong>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-level="facile">Facile</button>
+    <button class="tab" data-level="moyen">Moyen</button>
+    <button class="tab" data-level="difficile">Difficile</button>
+    <button class="tab impossible" data-level="impossible">Impossible</button>
+  </div>
+
+  <div class="mode-switch">
+    <button class="mode-btn active" data-mode="classique">Classique</button>
+    <button class="mode-btn" data-mode="cible" id="mode-cible-btn">Cible libre</button>
+  </div>
+
+  <div class="info-toggle">
+    <button id="info-btn">Comment jouer ?</button>
+  </div>
+  <div class="info-box" id="info-box"></div>
+
+  <div id="classique-area" class="active">
+    <div class="message" id="classique-message"></div>
+    <div class="grid" id="grid"></div>
+    <div class="banner" id="banner">
+      <h3 id="banner-title"></h3>
+      <p id="banner-text"></p>
+      <button id="banner-btn">Nouvelle partie</button>
+    </div>
+  </div>
+
+  <div id="cible-area">
+    <div class="target-frame">
+      <div class="num" id="cible-target">0</div>
+      <div class="lbl">à atteindre</div>
+    </div>
+    <div class="constraint" id="cible-constraint"></div>
+    <div class="cible-input" id="cible-input"></div>
+    <div class="message" id="cible-message"></div>
+    <div class="cible-actions">
+      <button id="cible-clear">Effacer</button>
+      <button id="cible-check" class="primary">Vérifier</button>
+    </div>
+  </div>
+
+  <div class="keyboard" id="keyboard"></div>
+
+  <footer>Mathdle — fait pour s'entraîner, pas pour tricher en cours.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  function tokenize(str) {
+    const tokens = [];
+    let i = 0;
+    while (i < str.length) {
+      const c = str[i];
+      if (c >= '0' && c <= '9') {
+        let num = '';
+        while (i < str.length && str[i] >= '0' && str[i] <= '9') { num += str[i]; i++; }
+        tokens.push({ type: 'num', value: parseInt(num, 10) });
+        continue;
+      }
+      if ('+-*/()'.includes(c)) { tokens.push({ type: c }); i++; continue; }
+      throw new Error('Caractère invalide : ' + c);
+    }
+    return tokens;
+  }
+
+  function parseExpression(tokens) {
+    let pos = 0;
+    const peek = () => tokens[pos];
+    const consume = () => tokens[pos++];
+
+    function parseFactor() {
+      const t = peek();
+      if (!t) throw new Error('Expression incomplète');
+      if (t.type === '(') {
+        consume();
+        const val = parseExpr();
+        const close = consume();
+        if (!close || close.type !== ')') throw new Error('Parenthèse manquante');
+        return val;
+      }
+      if (t.type === 'num') { consume(); return t.value; }
+      throw new Error('Syntaxe invalide');
+    }
+    function parseTerm() {
+      let val = parseFactor();
+      while (peek() && (peek().type === '*' || peek().type === '/')) {
+        const op = consume().type;
+        const rhs = parseFactor();
+        if (op === '*') val = val * rhs;
+        else { if (rhs === 0) throw new Error('Division par zéro'); val = val / rhs; }
+      }
+      return val;
+    }
+    function parseExpr() {
+      let val = parseTerm();
+      while (peek() && (peek().type === '+' || peek().type === '-')) {
+        const op = consume().type;
+        const rhs = parseTerm();
+        val = op === '+' ? val + rhs : val - rhs;
+      }
+      return val;
+    }
+    const result = parseExpr();
+    if (pos !== tokens.length) throw new Error('Caractères en trop');
+    return result;
+  }
+
+  function evaluate(str) { return parseExpression(tokenize(str)); }
+
+  function checkEquation(str) {
+    const parts = str.split('=');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) return { valid: false, reason: 'Il faut un signe = avec un membre de chaque côté' };
+    try {
+      const left = evaluate(parts[0]);
+      const right = evaluate(parts[1]);
+      if (Math.abs(left - right) < 1e-9) return { valid: true, value: left };
+      return { valid: false, reason: 'Équation fausse' };
+    } catch (e) { return { valid: false, reason: e.message }; }
+  }
+
+  function checkExpression(str) {
+    try { return { valid: true, value: evaluate(str) }; }
+    catch (e) { return { valid: false, reason: e.message }; }
+  }
+
+  function compareGuess(guess, target) {
+    const n = target.length;
+    const result = new Array(n).fill(null);
+    const stock = {};
+    for (const ch of target) stock[ch] = (stock[ch] || 0) + 1;
+    for (let i = 0; i < n; i++) {
+      if (guess[i] === target[i]) { result[i] = 'correct'; stock[guess[i]]--; }
+    }
+    for (let i = 0; i < n; i++) {
+      if (result[i]) continue;
+      const ch = guess[i];
+      if (stock[ch] > 0) { result[i] = 'present'; stock[ch]--; }
+      else result[i] = 'absent';
+    }
+    return result;
+  }
+
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function generateEquation(level) {
+    for (let attempt = 0; attempt < 500; attempt++) {
+      if (level === 'facile') {
+        const a = randInt(1, 40), b = randInt(1, 40);
+        const op = Math.random() < 0.5 ? '+' : '-';
+        let x = a, y = b;
+        if (op === '-' && x < y) { const t = x; x = y; y = t; }
+        const result = op === '+' ? x + y : x - y;
+        return `${x}${op}${y}=${result}`;
+      }
+      if (level === 'moyen') {
+        const ops = ['+', '-', '*', '/'];
+        const op = ops[randInt(0, 3)];
+        let a, b, result;
+        if (op === '/') { b = randInt(2, 9); result = randInt(2, 12); a = b * result; }
+        else if (op === '*') { a = randInt(2, 12); b = randInt(2, 9); result = a * b; }
+        else {
+          a = randInt(1, 50); b = randInt(1, 50);
+          if (op === '-' && a < b) { const t = a; a = b; b = t; }
+          result = op === '+' ? a + b : a - b;
+        }
+        return `${a}${op}${b}=${result}`;
+      }
+      if (level === 'difficile') {
+        const ops = ['+', '-', '*'];
+        const op1 = ops[randInt(0, 2)], op2 = ops[randInt(0, 2)];
+        const a = randInt(1, 12), b = randInt(1, 12), c = randInt(1, 12);
+        const inner = op1 === '+' ? a + b : op1 === '-' ? a - b : a * b;
+        const result = op2 === '+' ? inner + c : op2 === '-' ? inner - c : inner * c;
+        if (result < 0 || result > 999) continue;
+        return `(${a}${op1}${b})${op2}${c}=${result}`;
+      }
+    }
+    return level === 'facile' ? '5+3=8' : level === 'moyen' ? '6*4=24' : '(3+2)*4=20';
+  }
+
+  const IMPOSSIBLE_BANK = [
+    ["lim","(","x","→","0",")","x","/","x","=","1"],
+    ["lim","(","x","→","∞",")","1","/","x","=","0"],
+    ["lim","(","x","→","2",")","x²","=","4"],
+    ["∫","x","dx","=","x²","/","2","+","C"],
+    ["d/dx","(","x²",")","=","2x"],
+    ["d/dx","(","x",")","=","1"],
+    ["∫","2x","dx","=","x²","+","C"],
+    ["lim","(","x","→","1",")","2x","=","2"],
+    ["√","4","=","2"],
+    ["√","9","=","3"],
+    ["lim","(","x","→","3",")","x","+","1","=","4"],
+    ["∫","1","dx","=","x","+","C"],
+    ["lim","(","x","→","0",")","2x","=","0"],
+    ["d/dx","(","2x",")","=","2"]
+  ];
+
+  function pickImpossibleTarget() {
+    return IMPOSSIBLE_BANK[randInt(0, IMPOSSIBLE_BANK.length - 1)].slice();
+  }
+
+  const LEVELS = {
+    facile:     { maxAttempts: 6, keys: ['+', '-', '='] },
+    moyen:      { maxAttempts: 6, keys: ['+', '-', '*', '/', '='] },
+    difficile:  { maxAttempts: 8, keys: ['+', '-', '*', '(', ')', '='] },
+    impossible: { maxAttempts: 8, keys: ['+', '-', '*', '/', '(', ')', '='], extraKeys: ['lim','∫','dx','d/dx','√','π','∞','→','x²','2x','C'] },
+  };
+
+  const CIBLE_LEVELS = {
+    facile:    { length: 3, keys: ['+', '-'], targetRange: [0, 18] },
+    moyen:     { length: 5, keys: ['+', '-', '*', '/'], targetRange: [-20, 60] },
+    difficile: { length: 7, keys: ['+', '-', '*', '(', ')'], targetRange: [-40, 100] },
+  };
+
+  let currentLevel = 'facile';
+  let currentMode = 'classique';
+  let streak = 0;
+
+  let target = [];
+  let rows = [];
+  let currentGuess = [];
+  let rowIndex = 0;
+  let gameOver = false;
+
+  let cibleTarget = 0;
+  let cibleInput = '';
+
+  const gridEl = document.getElementById('grid');
+  const classiqueMsg = document.getElementById('classique-message');
+  const banner = document.getElementById('banner');
+  const bannerTitle = document.getElementById('banner-title');
+  const bannerText = document.getElementById('banner-text');
+  const keyboardEl = document.getElementById('keyboard');
+  const cibleTargetEl = document.getElementById('cible-target');
+  const cibleConstraintEl = document.getElementById('cible-constraint');
+  const cibleInputEl = document.getElementById('cible-input');
+  const cibleMsg = document.getElementById('cible-message');
+  const statLabel = document.getElementById('stat-label');
+  const statValue = document.getElementById('stat-value');
+  const cibleModeBtn = document.getElementById('mode-cible-btn');
+
+  function startClassique() {
+    if (currentLevel === 'impossible') {
+      target = pickImpossibleTarget();
+    } else {
+      target = generateEquation(currentLevel).split('');
+    }
+    rows = [];
+    currentGuess = [];
+    rowIndex = 0;
+    gameOver = false;
+    classiqueMsg.textContent = '';
+    classiqueMsg.className = 'message';
+    banner.classList.remove('show');
+    renderGrid();
+  }
+
+  function renderGrid() {
+    gridEl.innerHTML = '';
+    const maxAttempts = LEVELS[currentLevel].maxAttempts;
+    const len = target.length;
+    const isSymbolic = currentLevel === 'impossible';
+    for (let r = 0; r < maxAttempts; r++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'grid-row' + (isSymbolic ? ' wrap-row' : '');
+      rowDiv.id = 'row-' + r;
+      const rowData = rows[r];
+      const guessArr = r === rowIndex ? currentGuess : null;
+      for (let c = 0; c < len; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell' + (isSymbolic ? ' token' : '');
+        if (rowData) {
+          cell.textContent = rowData.guess[c];
+          cell.classList.add(rowData.result[c]);
+        } else if (guessArr && guessArr[c] !== undefined) {
+          cell.textContent = guessArr[c];
+          cell.classList.add('filled');
+        }
+        rowDiv.appendChild(cell);
+      }
+      gridEl.appendChild(rowDiv);
+    }
+  }
+
+  function submitGuess() {
+    if (gameOver) return;
+    if (currentGuess.length !== target.length) {
+      showShake('row-' + rowIndex);
+      classiqueMsg.textContent = `Ta réponse doit faire ${target.length} caractères`;
+      classiqueMsg.className = 'message';
+      return;
+    }
+    if (currentLevel !== 'impossible') {
+      const check = checkEquation(currentGuess.join(''));
+      if (!check.valid) {
+        showShake('row-' + rowIndex);
+        classiqueMsg.textContent = 'Équation invalide — ' + check.reason;
+        classiqueMsg.className = 'message';
+        return;
+      }
+    }
+    classiqueMsg.textContent = '';
+    const result = compareGuess(currentGuess, target);
+    rows.push({ guess: currentGuess.slice(), result });
+    const won = result.every(r => r === 'correct');
+    rowIndex++;
+    currentGuess = [];
+    renderGrid();
+    document.getElementById('row-' + (rowIndex - 1)).classList.add('pop');
+
+    if (won) {
+      gameOver = true;
+      streak++;
+      updateStats();
+      showBanner(true);
+    } else if (rowIndex >= LEVELS[currentLevel].maxAttempts) {
+      gameOver = true;
+      streak = 0;
+      updateStats();
+      showBanner(false);
+    }
+  }
+
+  function showBanner(won) {
+    banner.classList.add('show');
+    const sep = currentLevel === 'impossible' ? ' ' : '';
+    if (won) {
+      bannerTitle.textContent = 'Trouvé !';
+      bannerTitle.style.color = 'var(--state-correct)';
+      bannerText.textContent = `L'équation était ${target.join(sep)}.`;
+    } else {
+      bannerTitle.textContent = 'Perdu';
+      bannerTitle.style.color = 'var(--danger)';
+      bannerText.textContent = `L'équation était ${target.join(sep)}.`;
+    }
+  }
+
+  function showShake(rowId) {
+    const el = document.getElementById(rowId);
+    if (!el) return;
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+  }
+
+  function typeChar(ch) {
+    if (currentMode === 'classique') {
+      if (gameOver) return;
+      if (currentGuess.length < target.length) {
+        currentGuess.push(ch);
+        renderGrid();
+      }
+    } else {
+      const cfg = CIBLE_LEVELS[currentLevel];
+      if (cibleInput.length < cfg.length) {
+        cibleInput += ch;
+        renderCibleInput();
+      }
+    }
+  }
+
+  function backspace() {
+    if (currentMode === 'classique') {
+      if (gameOver) return;
+      currentGuess.pop();
+      renderGrid();
+    } else {
+      cibleInput = cibleInput.slice(0, -1);
+      renderCibleInput();
+    }
+  }
+
+  function startCible() {
+    const cfg = CIBLE_LEVELS[currentLevel];
+    cibleTarget = randInt(cfg.targetRange[0], cfg.targetRange[1]);
+    cibleInput = '';
+    cibleTargetEl.textContent = cibleTarget;
+    cibleConstraintEl.innerHTML = `Utilise exactement <b>${cfg.length}</b> caractères. Opérateurs autorisés : <b>${cfg.keys.join(' ')}</b>`;
+    cibleMsg.textContent = '';
+    cibleMsg.className = 'message';
+    renderCibleInput();
+  }
+
+  function renderCibleInput() {
+    const cfg = CIBLE_LEVELS[currentLevel];
+    cibleInputEl.innerHTML = '';
+    for (let i = 0; i < cfg.length; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (cibleInput[i]) { cell.textContent = cibleInput[i]; cell.classList.add('filled'); }
+      cibleInputEl.appendChild(cell);
+    }
+  }
+
+  function checkCible() {
+    const cfg = CIBLE_LEVELS[currentLevel];
+    if (cibleInput.length !== cfg.length) {
+      cibleMsg.textContent = `Il faut exactement ${cfg.length} caractères`;
+      cibleMsg.className = 'message';
+      return;
+    }
+    const check = checkExpression(cibleInput);
+    if (!check.valid) {
+      cibleMsg.textContent = 'Expression invalide — ' + check.reason;
+      cibleMsg.className = 'message';
+      return;
+    }
+    if (Math.abs(check.value - cibleTarget) < 1e-9) {
+      streak++;
+      updateStats();
+      cibleMsg.textContent = `Exact ! ${cibleInput} = ${cibleTarget}`;
+      cibleMsg.className = 'message success';
+      setTimeout(startCible, 1100);
+    } else {
+      cibleMsg.textContent = `Ça donne ${check.value}, pas ${cibleTarget}`;
+      cibleMsg.className = 'message';
+    }
+  }
+
+  function updateStats() {
+    statLabel.textContent = 'Série';
+    statValue.textContent = streak;
+  }
+
+  function renderKeyboard() {
+    keyboardEl.innerHTML = '';
+    const digitsRow1 = ['1', '2', '3', '4', '5'];
+    const digitsRow2 = ['6', '7', '8', '9', '0'];
+    const levelCfg = currentMode === 'classique' ? LEVELS[currentLevel] : CIBLE_LEVELS[currentLevel];
+    const opKeys = levelCfg.keys;
+
+    const row1 = document.createElement('div');
+    row1.className = 'kb-row';
+    digitsRow1.forEach(k => row1.appendChild(makeKey(k)));
+    keyboardEl.appendChild(row1);
+
+    const row2 = document.createElement('div');
+    row2.className = 'kb-row';
+    digitsRow2.forEach(k => row2.appendChild(makeKey(k)));
+    keyboardEl.appendChild(row2);
+
+    const row3 = document.createElement('div');
+    row3.className = 'kb-row';
+    opKeys.forEach(k => row3.appendChild(makeKey(k, 'op')));
+    keyboardEl.appendChild(row3);
+
+    if (currentMode === 'classique' && levelCfg.extraKeys) {
+      const row3b = document.createElement('div');
+      row3b.className = 'kb-row';
+      levelCfg.extraKeys.forEach(k => row3b.appendChild(makeKey(k, 'symbol')));
+      keyboardEl.appendChild(row3b);
+    }
+
+    const row4 = document.createElement('div');
+    row4.className = 'kb-row';
+    const back = document.createElement('button');
+    back.className = 'key wide';
+    back.textContent = 'Effacer';
+    back.addEventListener('click', backspace);
+    row4.appendChild(back);
+
+    const enter = document.createElement('button');
+    enter.className = 'key wide enter';
+    enter.textContent = currentMode === 'classique' ? 'Valider' : 'OK';
+    enter.addEventListener('click', () => {
+      if (currentMode === 'classique') submitGuess(); else checkCible();
+    });
+    row4.appendChild(enter);
+    keyboardEl.appendChild(row4);
+  }
+
+  function makeKey(label, variant) {
+    const btn = document.createElement('button');
+    btn.className = 'key' + (variant ? ' ' + variant : '');
+    btn.textContent = label;
+    btn.addEventListener('click', () => typeChar(label));
+    return btn;
+  }
+
+  document.getElementById('tabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (!btn) return;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentLevel = btn.dataset.level;
+
+    if (currentLevel === 'impossible') {
+      currentMode = 'classique';
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-mode="classique"]').classList.add('active');
+      document.getElementById('classique-area').classList.add('active');
+      document.getElementById('cible-area').classList.remove('active');
+      cibleModeBtn.disabled = true;
+    } else {
+      cibleModeBtn.disabled = false;
+    }
+
+    updateInfoBox();
+    resetCurrentMode();
+  });
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMode = btn.dataset.mode;
+      document.getElementById('classique-area').classList.toggle('active', currentMode === 'classique');
+      document.getElementById('cible-area').classList.toggle('active', currentMode === 'cible');
+      updateInfoBox();
+      resetCurrentMode();
+    });
+  });
+
+  function resetCurrentMode() {
+    if (currentMode === 'classique') startClassique(); else startCible();
+    renderKeyboard();
+  }
+
+  function updateInfoBox() {
+    const box = document.getElementById('info-box');
+    if (currentMode === 'classique' && currentLevel === 'impossible') {
+      box.innerHTML = `<b>Impossible :</b> l'équation secrète vient d'une banque de limites, intégrales et dérivées. Les cases se comparent comme d'habitude, mais aucune vérification mathématique n'est faite sur tes essais : tape ce que tu penses être juste, la couleur des cases est ton seul indice.`;
+    } else if (currentMode === 'classique') {
+      box.innerHTML = `<b>Classique :</b> devine l'équation secrète avant d'épuiser tes essais. Après chaque tentative, chaque case devient
+      <b style="color:var(--state-correct)">verte</b> (bon caractère, bonne place),
+      <b style="color:var(--state-present)">orange</b> (bon caractère, mauvaise place), ou
+      <b style="color:var(--ink-dim)">grise</b> (absent). Ta tentative doit être une équation vraie de la même longueur.`;
+    } else {
+      box.innerHTML = `<b>Cible libre :</b> un nombre à atteindre s'affiche. Construis une expression qui donne exactement ce résultat, en utilisant pile le nombre de caractères imposé.`;
+    }
+  }
+
+  document.getElementById('info-btn').addEventListener('click', () => {
+    document.getElementById('info-box').classList.toggle('open');
+  });
+
+  document.getElementById('banner-btn').addEventListener('click', startClassique);
+  document.getElementById('cible-clear').addEventListener('click', () => { cibleInput = ''; renderCibleInput(); });
+  document.getElementById('cible-check').addEventListener('click', checkCible);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace') { backspace(); return; }
+    if (e.key === 'Enter') { if (currentMode === 'classique') submitGuess(); else checkCible(); return; }
+    if (currentLevel !== 'impossible' && /^[0-9+\-*/()=]$/.test(e.key)) { typeChar(e.key); }
+  });
+
+  updateInfoBox();
+  resetCurrentMode();
+  updateStats();
+})();
+</script>
+</body>
+</html>

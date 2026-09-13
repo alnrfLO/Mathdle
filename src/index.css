@@ -1,0 +1,8 @@
+/* Thème "chalkboard" — palette de référence à reprendre depuis legacy-reference.html
+   fond ardoise vert-noir, grille millimétrée, Kalam (titres/accents) + JetBrains Mono (reste)
+   jaune craie #f0c85f, bleu craie #7fc4d9, vert/orange/gris chalky pour le feedback */
+
+body {
+  margin: 0;
+  font-family: "JetBrains Mono", monospace;
+}
