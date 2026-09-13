@@ -1,0 +1,17 @@
+.physics__reveal {
+  text-align: center;
+  margin: 4px 0 10px;
+}
+
+.physics__reveal-text {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--danger);
+  margin: 0 0 10px;
+}
+
+.physics__reveal-text--won {
+  color: var(--state-correct);
+  font-family: var(--font-screen);
+  font-size: 1.3rem;
+}

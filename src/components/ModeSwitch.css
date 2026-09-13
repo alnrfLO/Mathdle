@@ -40,3 +40,8 @@
 .mode-btn + .mode-btn {
   border-left: 1px solid rgba(41, 51, 31, 0.3);
 }
+
+.mode-switch--triple .mode-btn {
+  font-size: clamp(0.6rem, 1.8vw, 0.68rem);
+  padding: 6px 3px;
+}

@@ -6,12 +6,11 @@ import type { MessageState } from "./useMathdle";
 
 const EMPTY_MESSAGE: MessageState = { text: "", variant: "" };
 
-export function useScience() {
+export function useScience(onCorrect: () => void) {
   const [level, setLevel] = useState<Exclude<Difficulty, "impossible">>("facile");
   const [question, setQuestion] = useState<ConversionQuestion>(() => generateConversion("facile"));
   const [input, setInput] = useState("");
   const [message, setMessage] = useState<MessageState>(EMPTY_MESSAGE);
-  const [streak, setStreak] = useState(0);
 
   const newQuestion = useCallback((lvl: Exclude<Difficulty, "impossible">) => {
     setQuestion(generateConversion(lvl));
@@ -49,10 +48,10 @@ export function useScience() {
       });
       return;
     }
-    setStreak((s) => s + 1);
     setMessage({ text: `Exact ! ${input} ${question.toUnit}`, variant: "success" });
+    onCorrect();
     window.setTimeout(() => newQuestion(level), 1000);
-  }, [input, question, level, newQuestion]);
+  }, [input, question, level, newQuestion, onCorrect]);
 
   // Passer une question ne coûte ni ne rapporte rien : c'est juste une
   // question à choix unique, pas un mode à tentatives limitées.
@@ -60,7 +59,6 @@ export function useScience() {
 
   return {
     level,
-    streak,
     question,
     input,
     message,

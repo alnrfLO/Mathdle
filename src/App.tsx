@@ -7,13 +7,19 @@ import { Grid } from "./components/Grid";
 import { Banner } from "./components/Banner";
 import { CibleLibre } from "./components/CibleLibre";
 import { ScienceScreen } from "./components/ScienceScreen";
+import { ChemistryScreen } from "./components/ChemistryScreen";
+import { PhysicsScreen } from "./components/PhysicsScreen";
 import { SubjectMenu } from "./components/SubjectMenu";
 import { Keyboard } from "./components/Keyboard";
 import { useMathdle } from "./hooks/useMathdle";
 import { useScience } from "./hooks/useScience";
+import { useChemistry } from "./hooks/useChemistry";
+import { usePhysicsFormulas } from "./hooks/usePhysicsFormulas";
 import { LEVELS } from "./game/config";
 import type { Subject } from "./game/types";
 import "./App.css";
+
+type ScienceGame = "conversions" | "chimie" | "formules";
 
 const SCIENCE_LEVELS = [
   { id: "facile" as const, label: "Facile", f: "F1" },
@@ -23,14 +29,23 @@ const SCIENCE_LEVELS = [
 
 function App() {
   const [subject, setSubject] = useState<Subject | "menu">("menu");
+  const [scienceGame, setScienceGame] = useState<ScienceGame>("conversions");
+  const [scienceStreak, setScienceStreak] = useState(0);
+  const onCorrect = () => setScienceStreak((s) => s + 1);
+
   const mathdle = useMathdle();
-  const science = useScience();
+  const conversions = useScience(onCorrect);
+  const chemistry = useChemistry(onCorrect);
+  const physics = usePhysicsFormulas(onCorrect);
 
   const isSymbolic = mathdle.level === "impossible";
   const levelCfg =
     mathdle.mode === "classique"
       ? LEVELS[mathdle.level]
       : LEVELS[mathdle.level === "impossible" ? "difficile" : mathdle.level];
+
+  const activeScience =
+    scienceGame === "conversions" ? conversions : scienceGame === "chimie" ? chemistry : physics;
 
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
@@ -51,23 +66,51 @@ function App() {
           else mathdle.cible.typeChar(e.key);
         }
       } else if (subject === "science") {
-        if (e.key === "Backspace") {
-          e.preventDefault();
-          science.backspace();
-          return;
-        }
-        if (e.key === "Enter") {
-          science.check();
-          return;
-        }
-        if (/^[0-9,.]$/.test(e.key)) {
-          science.typeChar(e.key === "." ? "," : e.key);
+        if (scienceGame === "conversions") {
+          if (e.key === "Backspace") {
+            e.preventDefault();
+            conversions.backspace();
+            return;
+          }
+          if (e.key === "Enter") {
+            conversions.check();
+            return;
+          }
+          if (/^[0-9,.]$/.test(e.key)) {
+            conversions.typeChar(e.key === "." ? "," : e.key);
+          }
+        } else if (scienceGame === "chimie") {
+          if (e.key === "Backspace") {
+            e.preventDefault();
+            chemistry.backspace();
+            return;
+          }
+          if (e.key === "Enter") {
+            chemistry.check();
+            return;
+          }
+          if (/^[0-9]$/.test(e.key)) {
+            chemistry.typeChar(e.key);
+          }
+        } else if (scienceGame === "formules") {
+          if (e.key === "Backspace") {
+            e.preventDefault();
+            physics.backspace();
+            return;
+          }
+          if (e.key === "Enter") {
+            physics.submitGuess();
+            return;
+          }
+          if (/^[0-9]$/.test(e.key)) {
+            physics.typeChar(e.key);
+          }
         }
       }
     }
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [subject, isSymbolic, mathdle, science]);
+  }, [subject, isSymbolic, mathdle, scienceGame, conversions, chemistry, physics]);
 
   return (
     <div className="scene">
@@ -87,7 +130,7 @@ function App() {
             </span>
           )}
           <span className="calculator__streak">
-            SÉRIE <strong>{subject === "science" ? science.streak : mathdle.streak}</strong>
+            SÉRIE <strong>{subject === "science" ? scienceStreak : mathdle.streak}</strong>
           </span>
         </div>
 
@@ -159,8 +202,11 @@ function App() {
                     <button
                       key={t.id}
                       type="button"
-                      className={"softkey" + (science.level === t.id ? " softkey--active" : "")}
-                      onClick={() => science.setLevel(t.id)}
+                      className={
+                        "softkey" +
+                        (activeScience.level === t.id ? " softkey--active" : "")
+                      }
+                      onClick={() => activeScience.setLevel(t.id)}
                     >
                       <span className="softkey__f">{t.f}</span>
                       <span className="softkey__label">{t.label}</span>
@@ -168,14 +214,67 @@ function App() {
                   ))}
                 </div>
 
-                <ScienceScreen
-                  question={science.question}
-                  input={science.input}
-                  message={science.message}
-                  streak={science.streak}
-                  onSkip={science.skip}
-                  onCheck={science.check}
-                />
+                <div className="mode-switch mode-switch--triple">
+                  <button
+                    type="button"
+                    className={"mode-btn" + (scienceGame === "conversions" ? " mode-btn--active" : "")}
+                    onClick={() => setScienceGame("conversions")}
+                  >
+                    Conversions
+                  </button>
+                  <button
+                    type="button"
+                    className={"mode-btn" + (scienceGame === "chimie" ? " mode-btn--active" : "")}
+                    onClick={() => setScienceGame("chimie")}
+                  >
+                    Chimie
+                  </button>
+                  <button
+                    type="button"
+                    className={"mode-btn" + (scienceGame === "formules" ? " mode-btn--active" : "")}
+                    onClick={() => setScienceGame("formules")}
+                  >
+                    Formules
+                  </button>
+                </div>
+
+                {scienceGame === "conversions" && (
+                  <ScienceScreen
+                    question={conversions.question}
+                    input={conversions.input}
+                    message={conversions.message}
+                    streak={scienceStreak}
+                    onSkip={conversions.skip}
+                    onCheck={conversions.check}
+                  />
+                )}
+
+                {scienceGame === "chimie" && (
+                  <ChemistryScreen
+                    equation={chemistry.equation}
+                    coeffs={chemistry.coeffs}
+                    activeIndex={chemistry.activeIndex}
+                    message={chemistry.message}
+                    onSelectSlot={chemistry.selectSlot}
+                    onSkip={chemistry.skip}
+                    onCheck={chemistry.check}
+                  />
+                )}
+
+                {scienceGame === "formules" && (
+                  <PhysicsScreen
+                    target={physics.target}
+                    rows={physics.rows}
+                    currentGuess={physics.currentGuess}
+                    rowIndex={physics.rowIndex}
+                    maxAttempts={physics.maxAttempts}
+                    gameOver={physics.gameOver}
+                    won={physics.won}
+                    message={physics.message}
+                    onSkip={physics.skip}
+                    onSubmit={physics.submitGuess}
+                  />
+                )}
 
                 <div className="screen-only-info">
                   <ScienceInfoPanel />
@@ -196,13 +295,34 @@ function App() {
           />
         )}
 
-        {subject === "science" && (
+        {subject === "science" && scienceGame === "conversions" && (
           <Keyboard
             opKeys={[","]}
-            onKey={science.typeChar}
-            onBackspace={science.backspace}
-            onSubmit={science.check}
+            onKey={conversions.typeChar}
+            onBackspace={conversions.backspace}
+            onSubmit={conversions.check}
             submitLabel="Vérifier"
+          />
+        )}
+
+        {subject === "science" && scienceGame === "chimie" && (
+          <Keyboard
+            opKeys={[]}
+            onKey={chemistry.typeChar}
+            onBackspace={chemistry.backspace}
+            onSubmit={chemistry.check}
+            submitLabel="Vérifier"
+          />
+        )}
+
+        {subject === "science" && scienceGame === "formules" && (
+          <Keyboard
+            opKeys={physics.keys}
+            extraKeys={physics.extraKeys}
+            onKey={physics.typeChar}
+            onBackspace={physics.backspace}
+            onSubmit={physics.submitGuess}
+            submitLabel="Valider"
           />
         )}
       </div>
