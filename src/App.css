@@ -41,8 +41,7 @@
   font-family: var(--font-mono);
 }
 
-.calculator__brand,
-.calculator__menu-btn {
+.calculator__brand {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -51,15 +50,27 @@
 }
 
 .calculator__menu-btn {
-  background: none;
-  border: none;
+  background: var(--case-deep);
+  border: 1px solid var(--case-trim);
+  border-radius: 5px;
   cursor: pointer;
   font-family: var(--font-mono);
-  padding: 4px 2px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--key-op);
+  padding: 5px 10px;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
 .calculator__menu-btn:hover {
-  color: var(--key-op);
+  background: var(--key-op);
+  color: var(--case-deep);
+}
+
+.calculator__menu-btn:active {
+  transform: translateY(1px);
 }
 
 .calculator__lives {
