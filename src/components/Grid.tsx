@@ -9,6 +9,7 @@ interface GridProps {
   currentGuess: string[];
   rowIndex: number;
   maxAttempts: number;
+  gameOver: boolean;
   isSymbolic: boolean;
   shakeRow: number | null;
   popRow: number | null;
@@ -20,15 +21,20 @@ export function Grid({
   currentGuess,
   rowIndex,
   maxAttempts,
+  gameOver,
   isSymbolic,
   shakeRow,
   popRow,
 }: GridProps) {
   const len = target.length;
+  // On ne montre que les lignes déjà jouées + la ligne active (pas toutes
+  // les tentatives possibles d'un coup) ; en fin de partie, pas de ligne
+  // vide en trop après la dernière tentative jouée.
+  const visibleRows = gameOver ? rowIndex : Math.min(rowIndex + 1, maxAttempts);
 
   return (
     <div className="grid">
-      {Array.from({ length: maxAttempts }, (_, r) => {
+      {Array.from({ length: visibleRows }, (_, r) => {
         const rowData = rows[r];
         const isCurrentRow = r === rowIndex;
         const rowClasses = [

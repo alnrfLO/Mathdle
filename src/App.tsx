@@ -11,7 +11,8 @@ import { LEVELS } from "./game/config";
 import "./App.css";
 
 function App() {
-  const { level, mode, streak, setLevel, setMode, newGame, classique, cible } = useMathdle();
+  const { level, mode, streak, lives, maxLives, setLevel, setMode, newGame, classique, cible } =
+    useMathdle();
 
   const isSymbolic = level === "impossible";
   const levelCfg =
@@ -44,6 +45,10 @@ function App() {
       <div className="calculator">
         <div className="calculator__brandrow">
           <span className="calculator__brand">MATHDLE-92</span>
+          <span className="calculator__lives" aria-label={`${lives} vies sur ${maxLives}`}>
+            {"♥".repeat(lives)}
+            {"♡".repeat(maxLives - lives)}
+          </span>
           <span className="calculator__streak">
             SÉRIE <strong>{streak}</strong>
           </span>
@@ -70,6 +75,7 @@ function App() {
                   currentGuess={classique.currentGuess}
                   rowIndex={classique.rowIndex}
                   maxAttempts={classique.maxAttempts}
+                  gameOver={classique.gameOver}
                   isSymbolic={isSymbolic}
                   shakeRow={classique.shakeRow}
                   popRow={classique.popRow}
@@ -79,6 +85,9 @@ function App() {
                     won={classique.won}
                     target={classique.target}
                     isSymbolic={isSymbolic}
+                    lives={lives}
+                    maxLives={maxLives}
+                    streakJustReset={classique.streakJustReset}
                     onNewGame={newGame}
                   />
                 )}

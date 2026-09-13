@@ -16,6 +16,7 @@ export interface MessageState {
 }
 
 const EMPTY_MESSAGE: MessageState = { text: "", variant: "" };
+const MAX_LIVES = 3;
 
 function freshClassiqueTarget(level: Difficulty): string[] {
   return level === "impossible" ? pickImpossibleTarget() : generateEquation(level).split("");
@@ -25,6 +26,8 @@ export function useMathdle() {
   const [level, setLevelState] = useState<Difficulty>("facile");
   const [mode, setModeState] = useState<GameMode>("classique");
   const [streak, setStreak] = useState(0);
+  const [lives, setLives] = useState(MAX_LIVES);
+  const [streakJustReset, setStreakJustReset] = useState(false);
 
   // --- Mode Classique ---
   const [target, setTarget] = useState<string[]>(() => freshClassiqueTarget("facile"));
@@ -52,6 +55,7 @@ export function useMathdle() {
     setWon(false);
     setShowBanner(false);
     setClassiqueMessage(EMPTY_MESSAGE);
+    setStreakJustReset(false);
   }, []);
 
   const startCible = useCallback((lvl: Exclude<Difficulty, "impossible">) => {
@@ -161,14 +165,24 @@ export function useMathdle() {
       setGameOver(true);
       setWon(true);
       setStreak((s) => s + 1);
+      setLives(MAX_LIVES);
+      setStreakJustReset(false);
       setShowBanner(true);
     } else if (nextRowIndex >= LEVELS[level].maxAttempts) {
       setGameOver(true);
       setWon(false);
-      setStreak(0);
       setShowBanner(true);
+      const remaining = lives - 1;
+      if (remaining <= 0) {
+        setStreak(0);
+        setLives(MAX_LIVES);
+        setStreakJustReset(true);
+      } else {
+        setLives(remaining);
+        setStreakJustReset(false);
+      }
     }
-  }, [gameOver, currentGuess, target, rowIndex, level, triggerShake]);
+  }, [gameOver, currentGuess, target, rowIndex, level, triggerShake, lives]);
 
   const checkCible = useCallback(() => {
     const cfg = CIBLE_LEVELS[level as Exclude<Difficulty, "impossible">];
@@ -199,6 +213,8 @@ export function useMathdle() {
     level,
     mode,
     streak,
+    lives,
+    maxLives: MAX_LIVES,
     setLevel,
     setMode,
     newGame,
@@ -210,6 +226,7 @@ export function useMathdle() {
       gameOver,
       won,
       showBanner,
+      streakJustReset,
       message: classiqueMessage,
       shakeRow,
       popRow,
