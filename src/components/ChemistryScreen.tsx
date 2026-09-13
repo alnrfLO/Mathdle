@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import { classifyReaction } from "../science/chemistry";
 import type { ChemEquation } from "../science/chemistry";
 import type { MessageState } from "../hooks/useMathdle";
 import "./ChemistryScreen.css";
@@ -12,6 +14,13 @@ interface ChemistryScreenProps {
   onCheck: () => void;
 }
 
+// Découpe une formule ("Ca(OH)2", "Al2(SO4)3") pour passer ses chiffres en
+// indice, sans changer la police (contrairement à des caractères unicode
+// ₀₋₉, ça reste dans la même fonte que le reste de l'écran LCD).
+function renderFormula(formula: string): ReactNode {
+  return formula.split(/([0-9]+)/).map((part, i) => (/^[0-9]+$/.test(part) ? <sub key={i}>{part}</sub> : part));
+}
+
 export function ChemistryScreen({
   equation,
   coeffs,
@@ -23,10 +32,15 @@ export function ChemistryScreen({
 }: ChemistryScreenProps) {
   const compounds = [...equation.reactants, ...equation.products];
   const reactantCount = equation.reactants.length;
+  const nature = classifyReaction(equation);
 
   return (
     <div className="chem">
       <p className="chem__eyebrow">ÉQUILIBRE LA RÉACTION</p>
+
+      <p className="chem__hint">
+        Indice : <strong>{nature}</strong>
+      </p>
 
       <div className="chem__equation">
         {compounds.map((formula, i) => (
@@ -41,7 +55,7 @@ export function ChemistryScreen({
             >
               {coeffs[i] ?? ""}
             </button>
-            <span className="chem__formula">{formula}</span>
+            <span className="chem__formula">{renderFormula(formula)}</span>
           </span>
         ))}
       </div>

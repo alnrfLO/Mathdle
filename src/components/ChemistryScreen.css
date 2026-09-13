@@ -10,6 +10,13 @@
   margin: 0 0 14px;
 }
 
+.chem__hint {
+  text-align: center;
+  font-size: clamp(0.76rem, 2vw, 0.85rem);
+  color: var(--state-present);
+  margin: 0 0 10px;
+}
+
 .chem__equation {
   background: var(--screen-bg-deep);
   border: 1px solid rgba(41, 51, 31, 0.3);
@@ -61,4 +68,9 @@
 
 .chem__formula {
   white-space: nowrap;
+}
+
+.chem__formula sub {
+  font-size: 0.7em;
+  line-height: 0;
 }

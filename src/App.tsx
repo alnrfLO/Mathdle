@@ -388,7 +388,7 @@ function App() {
                 )}
 
                 <div className="screen-only-info">
-                  <ScienceInfoPanel />
+                  <ScienceInfoPanel subject={scienceGame} />
                 </div>
               </>
             )}
@@ -471,7 +471,7 @@ function App() {
           {subject === "math" ? (
             <InfoPanel mode={mathdle.mode} level={mathdle.level} />
           ) : (
-            <ScienceInfoPanel />
+            <ScienceInfoPanel subject={scienceGame} />
           )}
           <p className="desk-note__footer">
             Mathdle — fait pour s'entraîner, pas pour tricher en cours.
