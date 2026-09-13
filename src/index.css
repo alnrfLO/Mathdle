@@ -1,8 +1,100 @@
-/* Thème "chalkboard" — palette de référence à reprendre depuis legacy-reference.html
-   fond ardoise vert-noir, grille millimétrée, Kalam (titres/accents) + JetBrains Mono (reste)
-   jaune craie #f0c85f, bleu craie #7fc4d9, vert/orange/gris chalky pour le feedback */
+@import "@fontsource/kalam/400.css";
+@import "@fontsource/kalam/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/700.css";
 
+:root {
+  --bg: #16221d;
+  --panel: #1e2c26;
+  --panel-hover: #253830;
+  --cell: #23342c;
+  --border: #3a4a42;
+  --border-soft: #2c3b34;
+  --ink: #f2f0e6;
+  --ink-dim: #93a89d;
+  --chalk-yellow: #f0c85f;
+  --chalk-blue: #7fc4d9;
+  --state-correct: #7fae6a;
+  --state-present: #d9a441;
+  --state-absent: #364840;
+  --danger: #d9705a;
+
+  --font-display: "Kalam", cursive;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
 body {
   margin: 0;
-  font-family: "JetBrains Mono", monospace;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+
+#root {
+  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Grain de craie très subtil, un seul détail texturé plutôt que partout */
+#root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--chalk-blue);
+  outline-offset: 2px;
+}
+
+.message {
+  text-align: center;
+  min-height: 20px;
+  font-size: clamp(0.76rem, 2vw, 0.85rem);
+  color: var(--danger);
+  margin-bottom: 10px;
+}
+
+.message--error {
+  color: var(--danger);
+}
+
+.message--success {
+  color: var(--state-correct);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

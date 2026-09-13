@@ -27,11 +27,15 @@ export function checkExpression(str: string): ExpressionCheckResult {
   }
 }
 
-export function compareGuess(guess: string, target: string): CellState[] {
+// guess/target sont des tableaux de "tokens" : un caractère pour les niveaux
+// facile/moyen/difficile, un token multi-caractères ("lim", "d/dx"...) pour
+// le niveau impossible. La comparaison position par position fonctionne à
+// l'identique dans les deux cas.
+export function compareGuess(guess: string[], target: string[]): CellState[] {
   const n = target.length;
   const result: CellState[] = new Array(n).fill("absent");
   const stock: Record<string, number> = {};
-  for (const ch of target) stock[ch] = (stock[ch] || 0) + 1;
+  for (const tok of target) stock[tok] = (stock[tok] || 0) + 1;
 
   for (let i = 0; i < n; i++) {
     if (guess[i] === target[i]) {
@@ -41,10 +45,10 @@ export function compareGuess(guess: string, target: string): CellState[] {
   }
   for (let i = 0; i < n; i++) {
     if (result[i] === "correct") continue;
-    const ch = guess[i];
-    if (stock[ch] > 0) {
+    const tok = guess[i];
+    if (stock[tok] > 0) {
       result[i] = "present";
-      stock[ch]--;
+      stock[tok]--;
     } else {
       result[i] = "absent";
     }

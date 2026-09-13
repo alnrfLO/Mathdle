@@ -1,0 +1,42 @@
+.mode-switch {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.mode-btn {
+  flex: 1;
+  background: var(--panel);
+  color: var(--ink-dim);
+  border: none;
+  font-family: inherit;
+  font-size: clamp(0.76rem, 2vw, 0.86rem);
+  padding: 10px 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mode-btn:not(:disabled):hover {
+  background: var(--panel-hover);
+}
+
+.mode-btn--active {
+  background: var(--chalk-blue);
+  color: #10201c;
+  font-weight: 700;
+}
+
+.mode-btn--active:hover {
+  background: var(--chalk-blue);
+}
+
+.mode-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.mode-btn + .mode-btn {
+  border-left: 1px solid var(--border);
+}

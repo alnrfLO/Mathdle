@@ -1,0 +1,53 @@
+.info-toggle {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.info-toggle button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-dim);
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.74rem;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.info-toggle button:hover {
+  border-color: var(--ink-dim);
+  color: var(--ink);
+}
+
+.info-box {
+  display: none;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  margin-bottom: 14px;
+  line-height: 1.55;
+}
+
+.info-box--open {
+  display: block;
+}
+
+.info-box b {
+  color: var(--ink);
+}
+
+/* Sur les écrans larges, le panneau d'aide reste ouvert en permanence
+   dans la colonne latérale, pas la peine d'un bouton accordéon */
+@media (min-width: 1024px) {
+  .info-toggle {
+    display: none;
+  }
+  .info-box {
+    display: block;
+    margin-bottom: 0;
+  }
+}

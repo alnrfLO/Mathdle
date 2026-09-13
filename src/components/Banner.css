@@ -1,0 +1,62 @@
+.banner {
+  background: var(--panel);
+  border: 1px solid var(--chalk-yellow);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+  animation: mathdle-banner-in 0.22s ease;
+}
+
+@keyframes mathdle-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.banner__title {
+  font-family: var(--font-display);
+  margin: 0 0 6px;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+}
+
+.banner__title--won {
+  color: var(--state-correct);
+}
+
+.banner__title--lost {
+  color: var(--danger);
+}
+
+.banner__text {
+  margin: 0 0 12px;
+  font-size: clamp(0.78rem, 2vw, 0.88rem);
+  color: var(--ink-dim);
+  word-break: break-word;
+}
+
+.banner__btn {
+  background: var(--chalk-yellow);
+  color: #241a06;
+  border: none;
+  font-family: inherit;
+  font-weight: 700;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-size: clamp(0.78rem, 2vw, 0.88rem);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+
+.banner__btn:hover {
+  background: #f3d372;
+}
+
+.banner__btn:active {
+  transform: scale(0.97);
+}

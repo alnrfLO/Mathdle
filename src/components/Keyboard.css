@@ -1,0 +1,65 @@
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.kb-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.key {
+  flex: 1;
+  max-width: clamp(36px, 8vw, 48px);
+  height: clamp(42px, 9vw, 52px);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease, transform 0.08s ease;
+}
+
+.key:hover {
+  background: var(--panel-hover);
+}
+
+.key:active {
+  background: var(--border);
+  transform: scale(0.96);
+}
+
+.key--op {
+  color: var(--chalk-blue);
+}
+
+.key--symbol {
+  color: var(--danger);
+  font-size: clamp(0.6rem, 1.8vw, 0.7rem);
+  max-width: 60px;
+}
+
+.key--wide {
+  max-width: 100px;
+  font-size: clamp(0.7rem, 2vw, 0.78rem);
+}
+
+.key--enter {
+  background: var(--chalk-yellow);
+  color: #241a06;
+  font-weight: 700;
+  border-color: var(--chalk-yellow);
+}
+
+.key--enter:hover {
+  background: #f3d372;
+}
