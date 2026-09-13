@@ -1,0 +1,97 @@
+.science {
+  padding: 6px 2px 2px;
+}
+
+.science__eyebrow {
+  text-align: center;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  margin: 0 0 16px;
+}
+
+.science__readout {
+  background: var(--screen-bg-deep);
+  border: 1px solid rgba(41, 51, 31, 0.3);
+  border-radius: 4px;
+  padding: 16px 14px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.science__question {
+  font-family: var(--font-screen);
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  color: var(--ink);
+}
+
+.science__arrow {
+  font-family: var(--font-mono);
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+.science__answer-line {
+  font-family: var(--font-screen);
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  color: var(--ink);
+  min-height: 1.3em;
+}
+
+.science__placeholder {
+  color: var(--ink-dim);
+  opacity: 0.6;
+}
+
+.science__cursor {
+  color: var(--ink);
+  opacity: 0.5;
+  animation: mathdle-caret 1s steps(1) infinite;
+}
+
+@keyframes mathdle-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.science__unit {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  margin-left: 8px;
+}
+
+.science__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.science-btn {
+  font-family: var(--font-mono);
+  font-size: clamp(0.68rem, 1.8vw, 0.76rem);
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid rgba(41, 51, 31, 0.3);
+  background: var(--screen-bg-deep);
+  color: var(--ink);
+}
+
+.science-btn:hover {
+  background: var(--screen-bg);
+}
+
+.science-btn--primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--screen-bg);
+}
+
+.science-btn--primary:hover {
+  opacity: 0.85;
+}

@@ -41,12 +41,25 @@
   font-family: var(--font-mono);
 }
 
-.calculator__brand {
+.calculator__brand,
+.calculator__menu-btn {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--case-trim);
   white-space: nowrap;
+}
+
+.calculator__menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  padding: 4px 2px;
+}
+
+.calculator__menu-btn:hover {
+  color: var(--key-op);
 }
 
 .calculator__lives {

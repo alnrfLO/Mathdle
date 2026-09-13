@@ -1,5 +1,7 @@
 // Types partagés du jeu Mathdle
 
+export type Subject = "math" | "science";
+
 export type Difficulty = "facile" | "moyen" | "difficile" | "impossible";
 
 export type GameMode = "classique" | "cible";

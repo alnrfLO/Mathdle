@@ -1,132 +1,226 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SoftkeyTabs } from "./components/SoftkeyTabs";
 import { ModeSwitch } from "./components/ModeSwitch";
 import { InfoPanel } from "./components/InfoPanel";
+import { ScienceInfoPanel } from "./components/ScienceInfoPanel";
 import { Grid } from "./components/Grid";
 import { Banner } from "./components/Banner";
 import { CibleLibre } from "./components/CibleLibre";
+import { ScienceScreen } from "./components/ScienceScreen";
+import { SubjectMenu } from "./components/SubjectMenu";
 import { Keyboard } from "./components/Keyboard";
 import { useMathdle } from "./hooks/useMathdle";
+import { useScience } from "./hooks/useScience";
 import { LEVELS } from "./game/config";
+import type { Subject } from "./game/types";
 import "./App.css";
 
-function App() {
-  const { level, mode, streak, lives, maxLives, setLevel, setMode, newGame, classique, cible } =
-    useMathdle();
+const SCIENCE_LEVELS = [
+  { id: "facile" as const, label: "Facile", f: "F1" },
+  { id: "moyen" as const, label: "Moyen", f: "F2" },
+  { id: "difficile" as const, label: "Difficile", f: "F3" },
+];
 
-  const isSymbolic = level === "impossible";
+function App() {
+  const [subject, setSubject] = useState<Subject | "menu">("menu");
+  const mathdle = useMathdle();
+  const science = useScience();
+
+  const isSymbolic = mathdle.level === "impossible";
   const levelCfg =
-    mode === "classique" ? LEVELS[level] : LEVELS[level === "impossible" ? "difficile" : level];
+    mathdle.mode === "classique"
+      ? LEVELS[mathdle.level]
+      : LEVELS[mathdle.level === "impossible" ? "difficile" : mathdle.level];
 
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
-      if (e.key === "Backspace") {
-        e.preventDefault();
-        if (mode === "classique") classique.backspace();
-        else cible.backspace();
-        return;
-      }
-      if (e.key === "Enter") {
-        if (mode === "classique") classique.submitGuess();
-        else cible.check();
-        return;
-      }
-      if (!isSymbolic && /^[0-9+\-*/()=]$/.test(e.key)) {
-        if (mode === "classique") classique.typeChar(e.key);
-        else cible.typeChar(e.key);
+      if (subject === "math") {
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          if (mathdle.mode === "classique") mathdle.classique.backspace();
+          else mathdle.cible.backspace();
+          return;
+        }
+        if (e.key === "Enter") {
+          if (mathdle.mode === "classique") mathdle.classique.submitGuess();
+          else mathdle.cible.check();
+          return;
+        }
+        if (!isSymbolic && /^[0-9+\-*/()=]$/.test(e.key)) {
+          if (mathdle.mode === "classique") mathdle.classique.typeChar(e.key);
+          else mathdle.cible.typeChar(e.key);
+        }
+      } else if (subject === "science") {
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          science.backspace();
+          return;
+        }
+        if (e.key === "Enter") {
+          science.check();
+          return;
+        }
+        if (/^[0-9,.]$/.test(e.key)) {
+          science.typeChar(e.key === "." ? "," : e.key);
+        }
       }
     }
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [mode, isSymbolic, classique, cible]);
+  }, [subject, isSymbolic, mathdle, science]);
 
   return (
     <div className="scene">
       <div className="calculator">
         <div className="calculator__brandrow">
-          <span className="calculator__brand">MATHDLE-92</span>
-          <span className="calculator__lives" aria-label={`${lives} vies sur ${maxLives}`}>
-            {"♥".repeat(lives)}
-            {"♡".repeat(maxLives - lives)}
-          </span>
+          {subject === "menu" ? (
+            <span className="calculator__brand">MATHDLE-92</span>
+          ) : (
+            <button type="button" className="calculator__menu-btn" onClick={() => setSubject("menu")}>
+              ← MENU
+            </button>
+          )}
+          {subject === "math" && (
+            <span className="calculator__lives" aria-label={`${mathdle.lives} vies sur ${mathdle.maxLives}`}>
+              {"♥".repeat(mathdle.lives)}
+              {"♡".repeat(mathdle.maxLives - mathdle.lives)}
+            </span>
+          )}
           <span className="calculator__streak">
-            SÉRIE <strong>{streak}</strong>
+            SÉRIE <strong>{subject === "science" ? science.streak : mathdle.streak}</strong>
           </span>
         </div>
 
         <div className="calculator__screen-frame">
           <div className="calculator__screen">
-            <SoftkeyTabs level={level} onChange={setLevel} />
-            <ModeSwitch mode={mode} disabled={isSymbolic} onChange={setMode} />
+            {subject === "menu" && <SubjectMenu onChoose={setSubject} />}
 
-            {mode === "classique" ? (
-              <div className="play-area">
-                <div
-                  className={
-                    "message" +
-                    (classique.message.variant ? ` message--${classique.message.variant}` : "")
-                  }
-                >
-                  {classique.message.text}
-                </div>
-                <Grid
-                  target={classique.target}
-                  rows={classique.rows}
-                  currentGuess={classique.currentGuess}
-                  rowIndex={classique.rowIndex}
-                  maxAttempts={classique.maxAttempts}
-                  gameOver={classique.gameOver}
-                  isSymbolic={isSymbolic}
-                  shakeRow={classique.shakeRow}
-                  popRow={classique.popRow}
-                />
-                {classique.showBanner && (
-                  <Banner
-                    won={classique.won}
-                    target={classique.target}
-                    isSymbolic={isSymbolic}
-                    lives={lives}
-                    maxLives={maxLives}
-                    streakJustReset={classique.streakJustReset}
-                    onNewGame={newGame}
+            {subject === "math" && (
+              <>
+                <SoftkeyTabs level={mathdle.level} onChange={mathdle.setLevel} />
+                <ModeSwitch mode={mathdle.mode} disabled={isSymbolic} onChange={mathdle.setMode} />
+
+                {mathdle.mode === "classique" ? (
+                  <div className="play-area">
+                    <div
+                      className={
+                        "message" +
+                        (mathdle.classique.message.variant
+                          ? ` message--${mathdle.classique.message.variant}`
+                          : "")
+                      }
+                    >
+                      {mathdle.classique.message.text}
+                    </div>
+                    <Grid
+                      target={mathdle.classique.target}
+                      rows={mathdle.classique.rows}
+                      currentGuess={mathdle.classique.currentGuess}
+                      rowIndex={mathdle.classique.rowIndex}
+                      maxAttempts={mathdle.classique.maxAttempts}
+                      gameOver={mathdle.classique.gameOver}
+                      isSymbolic={isSymbolic}
+                      shakeRow={mathdle.classique.shakeRow}
+                      popRow={mathdle.classique.popRow}
+                    />
+                    {mathdle.classique.showBanner && (
+                      <Banner
+                        won={mathdle.classique.won}
+                        target={mathdle.classique.target}
+                        isSymbolic={isSymbolic}
+                        lives={mathdle.lives}
+                        maxLives={mathdle.maxLives}
+                        streakJustReset={mathdle.classique.streakJustReset}
+                        onNewGame={mathdle.newGame}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <CibleLibre
+                    target={mathdle.cible.target}
+                    input={mathdle.cible.input}
+                    config={mathdle.cible.config}
+                    message={mathdle.cible.message}
+                    onClear={mathdle.cible.clear}
+                    onCheck={mathdle.cible.check}
                   />
                 )}
-              </div>
-            ) : (
-              <CibleLibre
-                target={cible.target}
-                input={cible.input}
-                config={cible.config}
-                message={cible.message}
-                onClear={cible.clear}
-                onCheck={cible.check}
-              />
+
+                <div className="screen-only-info">
+                  <InfoPanel mode={mathdle.mode} level={mathdle.level} />
+                </div>
+              </>
             )}
 
-            <div className="screen-only-info">
-              <InfoPanel mode={mode} level={level} />
-            </div>
+            {subject === "science" && (
+              <>
+                <div className="softkeys">
+                  {SCIENCE_LEVELS.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={"softkey" + (science.level === t.id ? " softkey--active" : "")}
+                      onClick={() => science.setLevel(t.id)}
+                    >
+                      <span className="softkey__f">{t.f}</span>
+                      <span className="softkey__label">{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <ScienceScreen
+                  question={science.question}
+                  input={science.input}
+                  message={science.message}
+                  streak={science.streak}
+                  onSkip={science.skip}
+                  onCheck={science.check}
+                />
+
+                <div className="screen-only-info">
+                  <ScienceInfoPanel />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        <Keyboard
-          opKeys={levelCfg.keys}
-          extraKeys={mode === "classique" ? levelCfg.extraKeys : undefined}
-          onKey={mode === "classique" ? classique.typeChar : cible.typeChar}
-          onBackspace={mode === "classique" ? classique.backspace : cible.backspace}
-          onSubmit={mode === "classique" ? classique.submitGuess : cible.check}
-          submitLabel={mode === "classique" ? "Valider" : "OK"}
-        />
+        {subject === "math" && (
+          <Keyboard
+            opKeys={levelCfg.keys}
+            extraKeys={mathdle.mode === "classique" ? levelCfg.extraKeys : undefined}
+            onKey={mathdle.mode === "classique" ? mathdle.classique.typeChar : mathdle.cible.typeChar}
+            onBackspace={mathdle.mode === "classique" ? mathdle.classique.backspace : mathdle.cible.backspace}
+            onSubmit={mathdle.mode === "classique" ? mathdle.classique.submitGuess : mathdle.cible.check}
+            submitLabel={mathdle.mode === "classique" ? "Valider" : "OK"}
+          />
+        )}
+
+        {subject === "science" && (
+          <Keyboard
+            opKeys={[","]}
+            onKey={science.typeChar}
+            onBackspace={science.backspace}
+            onSubmit={science.check}
+            submitLabel="Vérifier"
+          />
+        )}
       </div>
 
-      <aside className="desk-note">
-        <p className="desk-note__pin">📌</p>
-        <h2>Aide-mémoire</h2>
-        <InfoPanel mode={mode} level={level} />
-        <p className="desk-note__footer">
-          Mathdle — fait pour s'entraîner, pas pour tricher en cours.
-        </p>
-      </aside>
+      {subject !== "menu" && (
+        <aside className="desk-note">
+          <p className="desk-note__pin">📌</p>
+          <h2>Aide-mémoire</h2>
+          {subject === "math" ? (
+            <InfoPanel mode={mathdle.mode} level={mathdle.level} />
+          ) : (
+            <ScienceInfoPanel />
+          )}
+          <p className="desk-note__footer">
+            Mathdle — fait pour s'entraîner, pas pour tricher en cours.
+          </p>
+        </aside>
+      )}
     </div>
   );
 }
