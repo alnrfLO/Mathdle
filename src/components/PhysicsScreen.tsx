@@ -4,6 +4,7 @@ import "./PhysicsScreen.css";
 
 interface PhysicsScreenProps {
   target: string[];
+  domaine: string;
   rows: GridRow[];
   currentGuess: string[];
   rowIndex: number;
@@ -17,6 +18,7 @@ interface PhysicsScreenProps {
 
 export function PhysicsScreen({
   target,
+  domaine,
   rows,
   currentGuess,
   rowIndex,
@@ -30,6 +32,10 @@ export function PhysicsScreen({
   return (
     <div className="physics">
       <p className="chem__eyebrow">DEVINE LA FORMULE</p>
+
+      <p className="chem__hint">
+        Domaine : <strong>{domaine}</strong>
+      </p>
 
       <div
         className={"message" + (message.variant ? ` message--${message.variant}` : "")}

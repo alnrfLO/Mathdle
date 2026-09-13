@@ -9,7 +9,9 @@ type Level = "facile" | "moyen" | "difficile";
 
 export function usePhysicsFormulas(onCorrect: () => void) {
   const [level, setLevelState] = useState<Level>("facile");
-  const [target, setTarget] = useState<string[]>(() => pickPhysicsFormula("facile"));
+  const initial = pickPhysicsFormula("facile");
+  const [target, setTarget] = useState<string[]>(() => initial.tokens);
+  const [domaine, setDomaine] = useState<string>(() => initial.domaine);
   const [rows, setRows] = useState<GridRow[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string[]>([]);
   const [rowIndex, setRowIndex] = useState(0);
@@ -18,7 +20,9 @@ export function usePhysicsFormulas(onCorrect: () => void) {
   const [message, setMessage] = useState<MessageState>(EMPTY_MESSAGE);
 
   const newFormula = useCallback((lvl: Level) => {
-    setTarget(pickPhysicsFormula(lvl));
+    const fresh = pickPhysicsFormula(lvl);
+    setTarget(fresh.tokens);
+    setDomaine(fresh.domaine);
     setRows([]);
     setCurrentGuess([]);
     setRowIndex(0);
@@ -77,6 +81,7 @@ export function usePhysicsFormulas(onCorrect: () => void) {
   return {
     level,
     target,
+    domaine,
     rows,
     currentGuess,
     rowIndex,

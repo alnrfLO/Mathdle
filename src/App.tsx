@@ -375,6 +375,7 @@ function App() {
                 {scienceGame === "formules" && (
                   <PhysicsScreen
                     target={physics.target}
+                    domaine={physics.domaine}
                     rows={physics.rows}
                     currentGuess={physics.currentGuess}
                     rowIndex={physics.rowIndex}
