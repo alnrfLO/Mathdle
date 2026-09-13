@@ -21,7 +21,7 @@ export const PHYSICS_LEVELS: Record<"facile" | "moyen" | "difficile", PhysicsLev
   facile: {
     maxAttempts: 6,
     keys: ["=", "×", "/"],
-    extraKeys: ["v", "d", "t", "F", "m", "a", "P", "g"],
+    extraKeys: ["v", "d", "t", "F", "m", "a", "P", "g", "ρ", "V"],
     bank: [
       { tokens: ["v", "=", "d", "/", "t"], domaine: "Mécanique" },
       { tokens: ["F", "=", "m", "×", "a"], domaine: "Mécanique" },
@@ -32,12 +32,15 @@ export const PHYSICS_LEVELS: Record<"facile" | "moyen" | "difficile", PhysicsLev
       { tokens: ["m", "=", "F", "/", "a"], domaine: "Mécanique" },
       { tokens: ["g", "=", "P", "/", "m"], domaine: "Mécanique" },
       { tokens: ["m", "=", "P", "/", "g"], domaine: "Mécanique" },
+      { tokens: ["ρ", "=", "m", "/", "V"], domaine: "Mécanique" },
+      { tokens: ["m", "=", "ρ", "×", "V"], domaine: "Mécanique" },
+      { tokens: ["V", "=", "m", "/", "ρ"], domaine: "Mécanique" },
     ],
   },
   moyen: {
     maxAttempts: 7,
     keys: ["=", "×", "/", "²"],
-    extraKeys: ["E", "m", "c", "P", "U", "I", "W", "F", "d", "R", "t"],
+    extraKeys: ["E", "m", "c", "P", "U", "I", "W", "F", "d", "R", "t", "f", "T"],
     bank: [
       { tokens: ["E", "=", "m", "c", "²"], domaine: "Énergie" },
       { tokens: ["P", "=", "U", "×", "I"], domaine: "Électricité" },
@@ -53,12 +56,21 @@ export const PHYSICS_LEVELS: Record<"facile" | "moyen" | "difficile", PhysicsLev
       { tokens: ["W", "=", "P", "×", "t"], domaine: "Énergie" },
       { tokens: ["t", "=", "W", "/", "P"], domaine: "Énergie" },
       { tokens: ["P", "=", "W", "/", "t"], domaine: "Énergie" },
+      { tokens: ["P", "=", "I", "²", "×", "R"], domaine: "Électricité" },
+      { tokens: ["R", "=", "P", "/", "I", "²"], domaine: "Électricité" },
+      { tokens: ["P", "=", "U", "²", "/", "R"], domaine: "Électricité" },
+      { tokens: ["R", "=", "U", "²", "/", "P"], domaine: "Électricité" },
+      { tokens: ["T", "=", "1", "/", "f"], domaine: "Ondes" },
+      { tokens: ["f", "=", "1", "/", "T"], domaine: "Ondes" },
     ],
   },
   difficile: {
     maxAttempts: 8,
     keys: ["=", "×", "/", "²", "(", ")"],
-    extraKeys: ["E", "m", "v", "F", "G", "m1", "m2", "r", "P", "S", "λ", "c", "f", "ρ", "g", "h"],
+    extraKeys: [
+      "E", "m", "v", "F", "G", "m1", "m2", "r", "P", "S", "λ", "c", "f", "ρ", "g", "h",
+      "k", "q1", "q2", "Ep",
+    ],
     bank: [
       { tokens: ["E", "=", "(", "1", "/", "2", ")", "m", "v", "²"], domaine: "Énergie" },
       { tokens: ["F", "=", "G", "(", "m1", "m2", ")", "/", "r", "²"], domaine: "Gravitation" },
@@ -72,6 +84,10 @@ export const PHYSICS_LEVELS: Record<"facile" | "moyen" | "difficile", PhysicsLev
       { tokens: ["G", "=", "F", "r", "²", "/", "(", "m1", "m2", ")"], domaine: "Gravitation" },
       { tokens: ["P", "=", "ρ", "×", "g", "×", "h"], domaine: "Pression" },
       { tokens: ["h", "=", "P", "/", "(", "ρ", "×", "g", ")"], domaine: "Pression" },
+      { tokens: ["F", "=", "k", "(", "q1", "q2", ")", "/", "r", "²"], domaine: "Électricité" },
+      { tokens: ["k", "=", "F", "r", "²", "/", "(", "q1", "q2", ")"], domaine: "Électricité" },
+      { tokens: ["Ep", "=", "m", "×", "g", "×", "h"], domaine: "Énergie" },
+      { tokens: ["m", "=", "Ep", "/", "(", "g", "×", "h", ")"], domaine: "Énergie" },
     ],
   },
 };
