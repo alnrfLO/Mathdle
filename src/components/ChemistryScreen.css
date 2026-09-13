@@ -66,6 +66,11 @@
   background: #fff;
 }
 
+.chem__slot:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .chem__formula {
   white-space: nowrap;
 }

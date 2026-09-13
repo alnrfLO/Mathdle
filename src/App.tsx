@@ -366,6 +366,7 @@ function App() {
                     coeffs={chemistry.coeffs}
                     activeIndex={chemistry.activeIndex}
                     message={chemistry.message}
+                    gameOver={chemistry.gameOver}
                     onSelectSlot={chemistry.selectSlot}
                     onSkip={chemistry.skip}
                     onCheck={chemistry.check}

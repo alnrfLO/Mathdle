@@ -31,6 +31,7 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
   const [message, setMessage] = useState<MessageState>(EMPTY_MESSAGE);
   const [attempts, setAttempts] = useState(0);
   const [lives, setLives] = useState(MAX_LIVES);
+  const [gameOver, setGameOver] = useState(false);
 
   const newEquation = useCallback((lvl: Level) => {
     const eq = pickChemEquation(lvl);
@@ -39,6 +40,7 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
     setActiveIndex(0);
     setAttempts(0);
     setMessage(EMPTY_MESSAGE);
+    setGameOver(false);
   }, []);
 
   const setLevel = useCallback(
@@ -49,12 +51,16 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
     [newEquation]
   );
 
-  const selectSlot = useCallback((i: number) => setActiveIndex(i), []);
+  const selectSlot = useCallback((i: number) => {
+    if (gameOver) return;
+    setActiveIndex(i);
+  }, [gameOver]);
 
   const total = equation.reactants.length + equation.products.length;
 
   const typeChar = useCallback(
     (d: string) => {
+      if (gameOver) return;
       const digit = Number(d);
       if (Number.isNaN(digit)) return;
       setCoeffs((c) => {
@@ -64,10 +70,11 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
       });
       setActiveIndex((i) => Math.min(i + 1, total - 1));
     },
-    [activeIndex, total]
+    [gameOver, activeIndex, total]
   );
 
   const backspace = useCallback(() => {
+    if (gameOver) return;
     setCoeffs((c) => {
       const next = [...c];
       if (next[activeIndex] !== null) {
@@ -75,9 +82,10 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
       }
       return next;
     });
-  }, [activeIndex]);
+  }, [gameOver, activeIndex]);
 
   const check = useCallback(() => {
+    if (gameOver) return;
     const filled = coeffs.map((c) => c ?? 0);
     const result = checkBalance(equation, filled);
 
@@ -99,7 +107,9 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
       return;
     }
 
-    // Plus d'essais pour cette équation : ça coûte une vie
+    // Plus d'essais pour cette équation : ça coûte une vie. On affiche la
+    // solution et on attend que la personne relance elle-même (pas de
+    // timeout) pour lui laisser le temps de la lire.
     const remainingLives = lives - 1;
     if (remainingLives <= 0) {
       onStreakReset();
@@ -115,8 +125,8 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
         variant: "error",
       });
     }
-    window.setTimeout(() => newEquation(level), 1700);
-  }, [coeffs, equation, level, attempts, lives, newEquation, onCorrect, onStreakReset]);
+    setGameOver(true);
+  }, [gameOver, coeffs, equation, level, attempts, lives, newEquation, onCorrect, onStreakReset]);
 
   const skip = useCallback(() => newEquation(level), [level, newEquation]);
 
@@ -130,6 +140,7 @@ export function useChemistry(onCorrect: () => void, onStreakReset: () => void) {
     maxAttempts: MAX_ATTEMPTS,
     lives,
     maxLives: MAX_LIVES,
+    gameOver,
     setLevel,
     selectSlot,
     typeChar,

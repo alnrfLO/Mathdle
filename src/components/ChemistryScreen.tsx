@@ -9,6 +9,7 @@ interface ChemistryScreenProps {
   coeffs: (number | null)[];
   activeIndex: number;
   message: MessageState;
+  gameOver: boolean;
   onSelectSlot: (i: number) => void;
   onSkip: () => void;
   onCheck: () => void;
@@ -26,6 +27,7 @@ export function ChemistryScreen({
   coeffs,
   activeIndex,
   message,
+  gameOver,
   onSelectSlot,
   onSkip,
   onCheck,
@@ -52,6 +54,7 @@ export function ChemistryScreen({
               type="button"
               className={"chem__slot" + (activeIndex === i ? " chem__slot--active" : "")}
               onClick={() => onSelectSlot(i)}
+              disabled={gameOver}
             >
               {coeffs[i] ?? ""}
             </button>
@@ -64,14 +67,22 @@ export function ChemistryScreen({
         {message.text}
       </div>
 
-      <div className="science__actions">
-        <button type="button" className="science-btn" onClick={onSkip}>
-          Passer
-        </button>
-        <button type="button" className="science-btn science-btn--primary" onClick={onCheck}>
-          Vérifier
-        </button>
-      </div>
+      {gameOver ? (
+        <div className="science__actions">
+          <button type="button" className="science-btn science-btn--primary" onClick={onSkip}>
+            Nouvelle équation
+          </button>
+        </div>
+      ) : (
+        <div className="science__actions">
+          <button type="button" className="science-btn" onClick={onSkip}>
+            Passer
+          </button>
+          <button type="button" className="science-btn science-btn--primary" onClick={onCheck}>
+            Vérifier
+          </button>
+        </div>
+      )}
     </div>
   );
 }
