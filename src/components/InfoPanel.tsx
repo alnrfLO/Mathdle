@@ -14,11 +14,11 @@ export function InfoPanel({ mode, level }: InfoPanelProps) {
   if (mode === "classique" && level === "impossible") {
     content = (
       <>
-        <b>Impossible :</b> l'équation secrète vient d'une banque de limites, intégrales et
-        dérivées. Un indice affiché en haut te donne sa nature (limite, dérivée, intégrale ou
-        racine carrée) pour te donner un point de départ. Les cases se comparent comme
-        d'habitude, mais aucune vérification mathématique n'est faite sur tes essais : tape ce
-        que tu penses être juste, la couleur des cases est ton autre indice.
+        <b>Impossible :</b> l'équation secrète vient d'une banque de limites, dérivées,
+        intégrales et racines carrées. Un indice affiché en haut te donne sa nature pour te
+        donner un point de départ. Les cases se comparent comme d'habitude, mais aucune
+        vérification mathématique n'est faite sur tes essais : tape ce que tu penses être juste,
+        la couleur des cases est ton autre indice.
       </>
     );
   } else if (mode === "classique") {

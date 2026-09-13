@@ -10,7 +10,7 @@ export const LEVELS: Record<Difficulty, LevelConfig & { extraKeys?: string[] }> 
   impossible: {
     maxAttempts: 8,
     keys: ["+", "-", "*", "/", "(", ")", "="],
-    extraKeys: ["lim", "∫", "dx", "d/dx", "√", "π", "∞", "→", "x²", "2x", "C"],
+    extraKeys: ["lim", "∫", "dx", "d/dx", "√", "π", "∞", "→", "x", "x²", "2x", "C"],
   },
 };
 
