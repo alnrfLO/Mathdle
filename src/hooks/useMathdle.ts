@@ -18,8 +18,12 @@ export interface MessageState {
 const EMPTY_MESSAGE: MessageState = { text: "", variant: "" };
 const MAX_LIVES = 3;
 
-function freshClassiqueTarget(level: Difficulty): string[] {
-  return level === "impossible" ? pickImpossibleTarget() : generateEquation(level).split("");
+function freshClassiqueTarget(level: Difficulty): { tokens: string[]; nature: string | null } {
+  if (level === "impossible") {
+    const picked = pickImpossibleTarget();
+    return { tokens: picked.tokens, nature: picked.nature };
+  }
+  return { tokens: generateEquation(level).split(""), nature: null };
 }
 
 export function useMathdle() {
@@ -30,7 +34,8 @@ export function useMathdle() {
   const [streakJustReset, setStreakJustReset] = useState(false);
 
   // --- Mode Classique ---
-  const [target, setTarget] = useState<string[]>(() => freshClassiqueTarget("facile"));
+  const [target, setTarget] = useState<string[]>(() => freshClassiqueTarget("facile").tokens);
+  const [impossibleNature, setImpossibleNature] = useState<string | null>(null);
   const [rows, setRows] = useState<GridRow[]>([]);
   const [currentGuess, setCurrentGuess] = useState<string[]>([]);
   const [rowIndex, setRowIndex] = useState(0);
@@ -47,7 +52,9 @@ export function useMathdle() {
   const [cibleMessage, setCibleMessage] = useState<MessageState>(EMPTY_MESSAGE);
 
   const startClassique = useCallback((lvl: Difficulty) => {
-    setTarget(freshClassiqueTarget(lvl));
+    const fresh = freshClassiqueTarget(lvl);
+    setTarget(fresh.tokens);
+    setImpossibleNature(fresh.nature);
     setRows([]);
     setCurrentGuess([]);
     setRowIndex(0);
@@ -220,6 +227,7 @@ export function useMathdle() {
     newGame,
     classique: {
       target,
+      nature: impossibleNature,
       rows,
       currentGuess,
       rowIndex,

@@ -90,6 +90,13 @@ button {
   color: var(--state-correct);
 }
 
+.impossible-hint {
+  text-align: center;
+  font-size: clamp(0.76rem, 2vw, 0.85rem);
+  color: var(--state-present);
+  margin-bottom: 8px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -251,6 +251,11 @@ function App() {
 
                 {mathdle.mode === "classique" ? (
                   <div className="play-area">
+                    {isSymbolic && mathdle.classique.nature && (
+                      <p className="impossible-hint">
+                        Indice : <strong>{mathdle.classique.nature}</strong>
+                      </p>
+                    )}
                     <div
                       className={
                         "message" +

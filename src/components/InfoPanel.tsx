@@ -15,9 +15,10 @@ export function InfoPanel({ mode, level }: InfoPanelProps) {
     content = (
       <>
         <b>Impossible :</b> l'équation secrète vient d'une banque de limites, intégrales et
-        dérivées. Les cases se comparent comme d'habitude, mais aucune vérification mathématique
-        n'est faite sur tes essais : tape ce que tu penses être juste, la couleur des cases est
-        ton seul indice.
+        dérivées. Un indice affiché en haut te donne sa nature (limite, dérivée, intégrale ou
+        racine carrée) pour te donner un point de départ. Les cases se comparent comme
+        d'habitude, mais aucune vérification mathématique n'est faite sur tes essais : tape ce
+        que tu penses être juste, la couleur des cases est ton autre indice.
       </>
     );
   } else if (mode === "classique") {
