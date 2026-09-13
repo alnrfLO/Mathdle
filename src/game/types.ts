@@ -1,6 +1,6 @@
 // Types partagés du jeu Mathdle
 
-export type Subject = "math" | "science";
+export type Subject = "math" | "science" | "prog";
 
 export type Difficulty = "facile" | "moyen" | "difficile" | "impossible";
 

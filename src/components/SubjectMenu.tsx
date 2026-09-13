@@ -23,6 +23,13 @@ export function SubjectMenu({ onChoose }: SubjectMenuProps) {
           <span className="subject-menu__desc">Conversions d'unités</span>
         </span>
       </button>
+      <button type="button" className="subject-menu__item" onClick={() => onChoose("prog")}>
+        <span className="subject-menu__num">3</span>
+        <span className="subject-menu__text">
+          <span className="subject-menu__title">PROGRAMMATION</span>
+          <span className="subject-menu__desc">Java, C++, Python, JS</span>
+        </span>
+      </button>
     </div>
   );
 }

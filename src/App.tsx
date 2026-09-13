@@ -10,9 +10,14 @@ import { ScienceScreen } from "./components/ScienceScreen";
 import { ChemistryScreen } from "./components/ChemistryScreen";
 import { PhysicsScreen } from "./components/PhysicsScreen";
 import { SubjectMenu } from "./components/SubjectMenu";
+import { LangMenu } from "./components/LangMenu";
 import { PlayModeMenu } from "./components/PlayModeMenu";
 import { DailyScreen } from "./components/DailyScreen";
 import { ScienceDailyScreen } from "./components/ScienceDailyScreen";
+import { ProgScreen } from "./components/ProgScreen";
+import { ProgTrousScreen } from "./components/ProgTrousScreen";
+import { ProgDailyScreen } from "./components/ProgDailyScreen";
+import { ProgInfoPanel } from "./components/ProgInfoPanel";
 import { LegalNotice } from "./components/LegalNotice";
 import { Keyboard } from "./components/Keyboard";
 import { useMathdle } from "./hooks/useMathdle";
@@ -21,11 +26,17 @@ import { useChemistry } from "./hooks/useChemistry";
 import { usePhysicsFormulas } from "./hooks/usePhysicsFormulas";
 import { useMathDaily } from "./hooks/useMathDaily";
 import { useScienceDaily } from "./hooks/useScienceDaily";
+import { useProgPageBlanche } from "./hooks/useProgPageBlanche";
+import { useProgATrous } from "./hooks/useProgATrous";
+import { useProgDaily } from "./hooks/useProgDaily";
 import { LEVELS } from "./game/config";
+import { PROG_LANG_LABELS } from "./game/programming";
+import type { ProgLang, ProgLevel } from "./game/programming";
 import type { Subject } from "./game/types";
 import "./App.css";
 
 type ScienceGame = "conversions" | "chimie" | "formules";
+type ProgType = "blanche" | "trous";
 type PlayMode = "menu" | "serie" | "daily";
 
 const SCIENCE_LEVELS = [
@@ -39,14 +50,21 @@ function App() {
   const [playMode, setPlayMode] = useState<PlayMode>("menu");
   const [scienceGame, setScienceGame] = useState<ScienceGame>("conversions");
   const [scienceStreak, setScienceStreak] = useState(0);
+  const [progLang, setProgLang] = useState<ProgLang | null>(null);
+  const [progLevel, setProgLevel] = useState<ProgLevel>("facile");
+  const [progType, setProgType] = useState<ProgType>("blanche");
+  const [progStreak, setProgStreak] = useState(0);
   const [showLegal, setShowLegal] = useState(false);
   const onCorrect = () => setScienceStreak((s) => s + 1);
   const onStreakReset = () => setScienceStreak(0);
+  const onProgCorrect = () => setProgStreak((s) => s + 1);
+  const onProgStreakReset = () => setProgStreak(0);
 
   // Choisir une matière repart toujours sur le choix Série/Énigme du jour
   const setSubject = (s: Subject | "menu") => {
     setSubjectState(s);
     setPlayMode("menu");
+    if (s !== "prog") setProgLang(null);
   };
 
   const mathdle = useMathdle();
@@ -55,6 +73,24 @@ function App() {
   const physics = usePhysicsFormulas(onCorrect);
   const mathDaily = useMathDaily();
   const scienceDaily = useScienceDaily();
+  const progPageBlanche = useProgPageBlanche(progLang ?? "javascript", progLevel, onProgCorrect);
+  const progATrous = useProgATrous(progLang ?? "javascript", progLevel, onProgCorrect, onProgStreakReset);
+  const progDailyJs = useProgDaily("javascript");
+  const progDailyPy = useProgDaily("python");
+  const progDailyJava = useProgDaily("java");
+  const progDailyCpp = useProgDaily("cpp");
+  const progDailyByLang: Record<ProgLang, typeof progDailyJs> = {
+    javascript: progDailyJs,
+    python: progDailyPy,
+    java: progDailyJava,
+    cpp: progDailyCpp,
+  };
+  const progDaily = progDailyByLang[progLang ?? "javascript"];
+
+  const chooseLang = (lang: ProgLang) => {
+    setProgLang(lang);
+    setPlayMode("menu");
+  };
 
   const isSymbolic = mathdle.level === "impossible";
   const levelCfg =
@@ -168,7 +204,17 @@ function App() {
             <button
               type="button"
               className="calculator__menu-btn"
-              onClick={() => (playMode !== "menu" ? setPlayMode("menu") : setSubject("menu"))}
+              onClick={() => {
+                if (playMode !== "menu") {
+                  setPlayMode("menu");
+                  return;
+                }
+                if (subject === "prog" && progLang) {
+                  setProgLang(null);
+                  return;
+                }
+                setSubject("menu");
+              }}
             >
               ← MENU
             </button>
@@ -185,14 +231,30 @@ function App() {
               {"♡".repeat(chemistry.maxLives - chemistry.lives)}
             </span>
           )}
+          {playMode === "serie" && subject === "prog" && progType === "trous" && (
+            <span className="calculator__lives" aria-label={`${progATrous.lives} vies sur ${progATrous.maxLives}`}>
+              {"♥".repeat(progATrous.lives)}
+              {"♡".repeat(progATrous.maxLives - progATrous.lives)}
+            </span>
+          )}
           {playMode === "serie" && (
             <span className="calculator__streak">
-              SÉRIE <strong>{subject === "science" ? scienceStreak : mathdle.streak}</strong>
+              SÉRIE{" "}
+              <strong>
+                {subject === "science" ? scienceStreak : subject === "prog" ? progStreak : mathdle.streak}
+              </strong>
             </span>
           )}
           {playMode === "daily" && (
             <span className="calculator__streak">
-              JOURS <strong>{subject === "science" ? scienceDaily.dayStreak : mathDaily.dayStreak}</strong>
+              JOURS{" "}
+              <strong>
+                {subject === "science"
+                  ? scienceDaily.dayStreak
+                  : subject === "prog"
+                    ? progDaily.dayStreak
+                    : mathDaily.dayStreak}
+              </strong>
             </span>
           )}
         </div>
@@ -201,12 +263,22 @@ function App() {
           <div className="calculator__screen">
             {subject === "menu" && <SubjectMenu onChoose={setSubject} />}
 
-            {subject !== "menu" && playMode === "menu" && (
+            {subject === "prog" && !progLang && <LangMenu onChoose={chooseLang} />}
+
+            {subject !== "menu" && (subject !== "prog" || progLang) && playMode === "menu" && (
               <PlayModeMenu
-                subjectLabel={subject === "math" ? "Maths" : "Sciences"}
-                dayStreak={subject === "science" ? scienceDaily.dayStreak : mathDaily.dayStreak}
+                subjectLabel={
+                  subject === "math" ? "Maths" : subject === "science" ? "Sciences" : PROG_LANG_LABELS[progLang!]
+                }
+                dayStreak={
+                  subject === "science" ? scienceDaily.dayStreak : subject === "prog" ? progDaily.dayStreak : mathDaily.dayStreak
+                }
                 alreadyPlayedToday={
-                  subject === "science" ? scienceDaily.alreadyPlayedToday : mathDaily.alreadyPlayedToday
+                  subject === "science"
+                    ? scienceDaily.alreadyPlayedToday
+                    : subject === "prog"
+                      ? progDaily.alreadyPlayedToday
+                      : mathDaily.alreadyPlayedToday
                 }
                 onChoose={setPlayMode}
               />
@@ -241,6 +313,24 @@ function App() {
                 alreadyPlayedToday={scienceDaily.alreadyPlayedToday}
                 dayStreak={scienceDaily.dayStreak}
                 lastWon={scienceDaily.lastWon}
+              />
+            )}
+
+            {subject === "prog" && progLang && playMode === "daily" && (
+              <ProgDailyScreen
+                langLabel={PROG_LANG_LABELS[progLang]}
+                enonce={progDaily.exercise.enonce}
+                target={progDaily.target}
+                rows={progDaily.rows}
+                currentGuess={progDaily.currentGuess}
+                rowIndex={progDaily.rowIndex}
+                maxAttempts={progDaily.maxAttempts}
+                gameOver={progDaily.gameOver}
+                won={progDaily.won}
+                message={progDaily.message}
+                alreadyPlayedToday={progDaily.alreadyPlayedToday}
+                dayStreak={progDaily.dayStreak}
+                lastWon={progDaily.lastWon}
               />
             )}
 
@@ -394,6 +484,78 @@ function App() {
                 </div>
               </>
             )}
+
+            {subject === "prog" && progLang && playMode === "serie" && (
+              <>
+                <div className="softkeys">
+                  {SCIENCE_LEVELS.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={"softkey" + (progLevel === t.id ? " softkey--active" : "")}
+                      onClick={() => setProgLevel(t.id)}
+                    >
+                      <span className="softkey__f">{t.f}</span>
+                      <span className="softkey__label">{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mode-switch">
+                  <button
+                    type="button"
+                    className={"mode-btn" + (progType === "trous" ? " mode-btn--active" : "")}
+                    onClick={() => setProgType("trous")}
+                  >
+                    Extrait à trous
+                  </button>
+                  <button
+                    type="button"
+                    className={"mode-btn" + (progType === "blanche" ? " mode-btn--active" : "")}
+                    onClick={() => setProgType("blanche")}
+                  >
+                    Page blanche
+                  </button>
+                </div>
+
+                {progType === "blanche" && (
+                  <ProgScreen
+                    titre={progPageBlanche.exercise.titre}
+                    enonce={progPageBlanche.exercise.enonce}
+                    target={progPageBlanche.target}
+                    rows={progPageBlanche.rows}
+                    currentGuess={progPageBlanche.currentGuess}
+                    rowIndex={progPageBlanche.rowIndex}
+                    maxAttempts={progPageBlanche.maxAttempts}
+                    gameOver={progPageBlanche.gameOver}
+                    won={progPageBlanche.won}
+                    message={progPageBlanche.message}
+                    onSkip={progPageBlanche.skip}
+                    onSubmit={progPageBlanche.submitGuess}
+                  />
+                )}
+
+                {progType === "trous" && (
+                  <ProgTrousScreen
+                    titre={progATrous.exercise.titre}
+                    enonce={progATrous.exercise.enonce}
+                    tokens={progATrous.exercise.tokens}
+                    answers={progATrous.answers}
+                    blanks={progATrous.blanks}
+                    activeIndex={progATrous.activeIndex}
+                    message={progATrous.message}
+                    gameOver={progATrous.gameOver}
+                    onSelectSlot={progATrous.selectSlot}
+                    onSkip={progATrous.skip}
+                    onCheck={progATrous.check}
+                  />
+                )}
+
+                <div className="screen-only-info">
+                  <ProgInfoPanel progType={progType} />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -459,6 +621,39 @@ function App() {
           />
         )}
 
+        {subject === "prog" && playMode === "serie" && progType === "blanche" && (
+          <Keyboard
+            opKeys={progPageBlanche.keys}
+            extraKeys={progPageBlanche.extraKeys}
+            onKey={progPageBlanche.typeChar}
+            onBackspace={progPageBlanche.backspace}
+            onSubmit={progPageBlanche.submitGuess}
+            submitLabel="Valider"
+          />
+        )}
+
+        {subject === "prog" && playMode === "serie" && progType === "trous" && (
+          <Keyboard
+            opKeys={progATrous.keys}
+            extraKeys={progATrous.extraKeys}
+            onKey={progATrous.typeChar}
+            onBackspace={progATrous.backspace}
+            onSubmit={progATrous.check}
+            submitLabel="Vérifier"
+          />
+        )}
+
+        {subject === "prog" && playMode === "daily" && !progDaily.alreadyPlayedToday && (
+          <Keyboard
+            opKeys={progDaily.keys}
+            extraKeys={progDaily.extraKeys}
+            onKey={progDaily.typeChar}
+            onBackspace={progDaily.backspace}
+            onSubmit={progDaily.submitGuess}
+            submitLabel="Valider"
+          />
+        )}
+
         <button type="button" className="calculator__legal-link" onClick={() => setShowLegal(true)}>
           Mentions légales
         </button>
@@ -472,8 +667,10 @@ function App() {
           <h2>Aide-mémoire</h2>
           {subject === "math" ? (
             <InfoPanel mode={mathdle.mode} level={mathdle.level} />
-          ) : (
+          ) : subject === "science" ? (
             <ScienceInfoPanel subject={scienceGame} />
+          ) : (
+            <ProgInfoPanel progType={progType} />
           )}
           <p className="desk-note__footer">
             Mathdle — fait pour s'entraîner, pas pour tricher en cours.
