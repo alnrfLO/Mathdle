@@ -10,16 +10,22 @@ import { ScienceScreen } from "./components/ScienceScreen";
 import { ChemistryScreen } from "./components/ChemistryScreen";
 import { PhysicsScreen } from "./components/PhysicsScreen";
 import { SubjectMenu } from "./components/SubjectMenu";
+import { PlayModeMenu } from "./components/PlayModeMenu";
+import { DailyScreen } from "./components/DailyScreen";
+import { ScienceDailyScreen } from "./components/ScienceDailyScreen";
 import { Keyboard } from "./components/Keyboard";
 import { useMathdle } from "./hooks/useMathdle";
 import { useScience } from "./hooks/useScience";
 import { useChemistry } from "./hooks/useChemistry";
 import { usePhysicsFormulas } from "./hooks/usePhysicsFormulas";
+import { useMathDaily } from "./hooks/useMathDaily";
+import { useScienceDaily } from "./hooks/useScienceDaily";
 import { LEVELS } from "./game/config";
 import type { Subject } from "./game/types";
 import "./App.css";
 
 type ScienceGame = "conversions" | "chimie" | "formules";
+type PlayMode = "menu" | "serie" | "daily";
 
 const SCIENCE_LEVELS = [
   { id: "facile" as const, label: "Facile", f: "F1" },
@@ -28,15 +34,25 @@ const SCIENCE_LEVELS = [
 ];
 
 function App() {
-  const [subject, setSubject] = useState<Subject | "menu">("menu");
+  const [subject, setSubjectState] = useState<Subject | "menu">("menu");
+  const [playMode, setPlayMode] = useState<PlayMode>("menu");
   const [scienceGame, setScienceGame] = useState<ScienceGame>("conversions");
   const [scienceStreak, setScienceStreak] = useState(0);
   const onCorrect = () => setScienceStreak((s) => s + 1);
+  const onStreakReset = () => setScienceStreak(0);
+
+  // Choisir une matière repart toujours sur le choix Série/Énigme du jour
+  const setSubject = (s: Subject | "menu") => {
+    setSubjectState(s);
+    setPlayMode("menu");
+  };
 
   const mathdle = useMathdle();
   const conversions = useScience(onCorrect);
-  const chemistry = useChemistry(onCorrect);
+  const chemistry = useChemistry(onCorrect, onStreakReset);
   const physics = usePhysicsFormulas(onCorrect);
+  const mathDaily = useMathDaily();
+  const scienceDaily = useScienceDaily();
 
   const isSymbolic = mathdle.level === "impossible";
   const levelCfg =
@@ -49,6 +65,34 @@ function App() {
 
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
+      if (playMode === "daily" && subject === "math") {
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          mathDaily.backspace();
+          return;
+        }
+        if (e.key === "Enter") {
+          mathDaily.submitGuess();
+          return;
+        }
+        if (/^[0-9+\-*/()=]$/.test(e.key)) mathDaily.typeChar(e.key);
+        return;
+      }
+      if (playMode === "daily" && subject === "science") {
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          scienceDaily.backspace();
+          return;
+        }
+        if (e.key === "Enter") {
+          scienceDaily.check();
+          return;
+        }
+        if (/^[0-9,.]$/.test(e.key)) scienceDaily.typeChar(e.key === "." ? "," : e.key);
+        return;
+      }
+      if (playMode !== "serie") return;
+
       if (subject === "math") {
         if (e.key === "Backspace") {
           e.preventDefault();
@@ -110,7 +154,7 @@ function App() {
     }
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [subject, isSymbolic, mathdle, scienceGame, conversions, chemistry, physics]);
+  }, [subject, playMode, isSymbolic, mathdle, scienceGame, conversions, chemistry, physics, mathDaily, scienceDaily]);
 
   return (
     <div className="scene">
@@ -119,26 +163,86 @@ function App() {
           {subject === "menu" ? (
             <span className="calculator__brand">MATHDLE-92</span>
           ) : (
-            <button type="button" className="calculator__menu-btn" onClick={() => setSubject("menu")}>
+            <button
+              type="button"
+              className="calculator__menu-btn"
+              onClick={() => (playMode !== "menu" ? setPlayMode("menu") : setSubject("menu"))}
+            >
               ← MENU
             </button>
           )}
-          {subject === "math" && (
+          {playMode === "serie" && subject === "math" && (
             <span className="calculator__lives" aria-label={`${mathdle.lives} vies sur ${mathdle.maxLives}`}>
               {"♥".repeat(mathdle.lives)}
               {"♡".repeat(mathdle.maxLives - mathdle.lives)}
             </span>
           )}
-          <span className="calculator__streak">
-            SÉRIE <strong>{subject === "science" ? scienceStreak : mathdle.streak}</strong>
-          </span>
+          {playMode === "serie" && subject === "science" && scienceGame === "chimie" && (
+            <span className="calculator__lives" aria-label={`${chemistry.lives} vies sur ${chemistry.maxLives}`}>
+              {"♥".repeat(chemistry.lives)}
+              {"♡".repeat(chemistry.maxLives - chemistry.lives)}
+            </span>
+          )}
+          {playMode === "serie" && (
+            <span className="calculator__streak">
+              SÉRIE <strong>{subject === "science" ? scienceStreak : mathdle.streak}</strong>
+            </span>
+          )}
+          {playMode === "daily" && (
+            <span className="calculator__streak">
+              JOURS <strong>{subject === "science" ? scienceDaily.dayStreak : mathDaily.dayStreak}</strong>
+            </span>
+          )}
         </div>
 
         <div className="calculator__screen-frame">
           <div className="calculator__screen">
             {subject === "menu" && <SubjectMenu onChoose={setSubject} />}
 
-            {subject === "math" && (
+            {subject !== "menu" && playMode === "menu" && (
+              <PlayModeMenu
+                subjectLabel={subject === "math" ? "Maths" : "Sciences"}
+                dayStreak={subject === "science" ? scienceDaily.dayStreak : mathDaily.dayStreak}
+                alreadyPlayedToday={
+                  subject === "science" ? scienceDaily.alreadyPlayedToday : mathDaily.alreadyPlayedToday
+                }
+                onChoose={setPlayMode}
+              />
+            )}
+
+            {subject === "math" && playMode === "daily" && (
+              <DailyScreen
+                kind="math"
+                target={mathDaily.target}
+                rows={mathDaily.rows}
+                currentGuess={mathDaily.currentGuess}
+                rowIndex={mathDaily.rowIndex}
+                maxAttempts={mathDaily.maxAttempts}
+                gameOver={mathDaily.gameOver}
+                won={mathDaily.won}
+                message={mathDaily.message}
+                alreadyPlayedToday={mathDaily.alreadyPlayedToday}
+                dayStreak={mathDaily.dayStreak}
+                lastWon={mathDaily.lastWon}
+              />
+            )}
+
+            {subject === "science" && playMode === "daily" && (
+              <ScienceDailyScreen
+                question={scienceDaily.question}
+                input={scienceDaily.input}
+                message={scienceDaily.message}
+                attempts={scienceDaily.attempts}
+                maxAttempts={scienceDaily.maxAttempts}
+                gameOver={scienceDaily.gameOver}
+                won={scienceDaily.won}
+                alreadyPlayedToday={scienceDaily.alreadyPlayedToday}
+                dayStreak={scienceDaily.dayStreak}
+                lastWon={scienceDaily.lastWon}
+              />
+            )}
+
+            {subject === "math" && playMode === "serie" && (
               <>
                 <SoftkeyTabs level={mathdle.level} onChange={mathdle.setLevel} />
                 <ModeSwitch mode={mathdle.mode} disabled={isSymbolic} onChange={mathdle.setMode} />
@@ -195,7 +299,7 @@ function App() {
               </>
             )}
 
-            {subject === "science" && (
+            {subject === "science" && playMode === "serie" && (
               <>
                 <div className="softkeys">
                   {SCIENCE_LEVELS.map((t) => (
@@ -284,7 +388,7 @@ function App() {
           </div>
         </div>
 
-        {subject === "math" && (
+        {subject === "math" && playMode === "serie" && (
           <Keyboard
             opKeys={levelCfg.keys}
             extraKeys={mathdle.mode === "classique" ? levelCfg.extraKeys : undefined}
@@ -295,7 +399,17 @@ function App() {
           />
         )}
 
-        {subject === "science" && scienceGame === "conversions" && (
+        {subject === "math" && playMode === "daily" && !mathDaily.alreadyPlayedToday && (
+          <Keyboard
+            opKeys={["+", "-", "*", "/", "="]}
+            onKey={mathDaily.typeChar}
+            onBackspace={mathDaily.backspace}
+            onSubmit={mathDaily.submitGuess}
+            submitLabel="Valider"
+          />
+        )}
+
+        {subject === "science" && playMode === "serie" && scienceGame === "conversions" && (
           <Keyboard
             opKeys={[","]}
             onKey={conversions.typeChar}
@@ -305,7 +419,7 @@ function App() {
           />
         )}
 
-        {subject === "science" && scienceGame === "chimie" && (
+        {subject === "science" && playMode === "serie" && scienceGame === "chimie" && (
           <Keyboard
             opKeys={[]}
             onKey={chemistry.typeChar}
@@ -315,7 +429,7 @@ function App() {
           />
         )}
 
-        {subject === "science" && scienceGame === "formules" && (
+        {subject === "science" && playMode === "serie" && scienceGame === "formules" && (
           <Keyboard
             opKeys={physics.keys}
             extraKeys={physics.extraKeys}
@@ -323,6 +437,16 @@ function App() {
             onBackspace={physics.backspace}
             onSubmit={physics.submitGuess}
             submitLabel="Valider"
+          />
+        )}
+
+        {subject === "science" && playMode === "daily" && !scienceDaily.alreadyPlayedToday && (
+          <Keyboard
+            opKeys={[","]}
+            onKey={scienceDaily.typeChar}
+            onBackspace={scienceDaily.backspace}
+            onSubmit={scienceDaily.check}
+            submitLabel="Vérifier"
           />
         )}
       </div>

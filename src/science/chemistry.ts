@@ -61,6 +61,10 @@ export function parseFormula(formula: string): AtomCount {
 export interface ChemEquation {
   reactants: string[];
   products: string[];
+  // Coefficients corrects les plus simples, utilisés uniquement pour
+  // révéler la réponse en cas d'échec — jamais pour la vérification,
+  // qui reste un vrai calcul sur ce que tape le joueur.
+  coeffs: number[];
 }
 
 function gcd(a: number, b: number): number {
@@ -98,30 +102,30 @@ export function checkBalance(equation: ChemEquation, coeffs: number[]): BalanceR
 }
 
 const FACILE: ChemEquation[] = [
-  { reactants: ["H2", "O2"], products: ["H2O"] },
-  { reactants: ["N2", "H2"], products: ["NH3"] },
-  { reactants: ["Na", "Cl2"], products: ["NaCl"] },
-  { reactants: ["Mg", "O2"], products: ["MgO"] },
-  { reactants: ["H2", "Cl2"], products: ["HCl"] },
-  { reactants: ["K", "O2"], products: ["K2O"] },
+  { reactants: ["H2", "O2"], products: ["H2O"], coeffs: [2, 1, 2] },
+  { reactants: ["N2", "H2"], products: ["NH3"], coeffs: [1, 3, 2] },
+  { reactants: ["Na", "Cl2"], products: ["NaCl"], coeffs: [2, 1, 2] },
+  { reactants: ["Mg", "O2"], products: ["MgO"], coeffs: [2, 1, 2] },
+  { reactants: ["H2", "Cl2"], products: ["HCl"], coeffs: [1, 1, 2] },
+  { reactants: ["K", "O2"], products: ["K2O"], coeffs: [4, 1, 2] },
 ];
 
 const MOYEN: ChemEquation[] = [
-  { reactants: ["CH4", "O2"], products: ["CO2", "H2O"] },
-  { reactants: ["Fe", "O2"], products: ["Fe2O3"] },
-  { reactants: ["Al", "O2"], products: ["Al2O3"] },
-  { reactants: ["Zn", "HCl"], products: ["ZnCl2", "H2"] },
-  { reactants: ["Ca", "O2"], products: ["CaO"] },
-  { reactants: ["C2H6", "O2"], products: ["CO2", "H2O"] },
+  { reactants: ["CH4", "O2"], products: ["CO2", "H2O"], coeffs: [1, 2, 1, 2] },
+  { reactants: ["Fe", "O2"], products: ["Fe2O3"], coeffs: [4, 3, 2] },
+  { reactants: ["Al", "O2"], products: ["Al2O3"], coeffs: [4, 3, 2] },
+  { reactants: ["Zn", "HCl"], products: ["ZnCl2", "H2"], coeffs: [1, 2, 1, 1] },
+  { reactants: ["Ca", "O2"], products: ["CaO"], coeffs: [2, 1, 2] },
+  { reactants: ["C2H6", "O2"], products: ["CO2", "H2O"], coeffs: [2, 7, 4, 6] },
 ];
 
 const DIFFICILE: ChemEquation[] = [
-  { reactants: ["C3H8", "O2"], products: ["CO2", "H2O"] },
-  { reactants: ["Fe2O3", "CO"], products: ["Fe", "CO2"] },
-  { reactants: ["Al", "Fe2O3"], products: ["Al2O3", "Fe"] },
-  { reactants: ["NH3", "O2"], products: ["NO", "H2O"] },
-  { reactants: ["Ca", "H2O"], products: ["Ca(OH)2", "H2"] },
-  { reactants: ["C4H10", "O2"], products: ["CO2", "H2O"] },
+  { reactants: ["C3H8", "O2"], products: ["CO2", "H2O"], coeffs: [1, 5, 3, 4] },
+  { reactants: ["Fe2O3", "CO"], products: ["Fe", "CO2"], coeffs: [1, 3, 2, 3] },
+  { reactants: ["Al", "Fe2O3"], products: ["Al2O3", "Fe"], coeffs: [2, 1, 1, 2] },
+  { reactants: ["NH3", "O2"], products: ["NO", "H2O"], coeffs: [4, 5, 4, 6] },
+  { reactants: ["Ca", "H2O"], products: ["Ca(OH)2", "H2"], coeffs: [1, 2, 1, 1] },
+  { reactants: ["C4H10", "O2"], products: ["CO2", "H2O"], coeffs: [2, 13, 8, 10] },
 ];
 
 export function pickChemEquation(level: "facile" | "moyen" | "difficile"): ChemEquation {

@@ -1,0 +1,37 @@
+.daily {
+  padding: 6px 2px 2px;
+  text-align: center;
+}
+
+.daily__eyebrow {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+}
+
+.daily__result {
+  font-family: var(--font-screen);
+  font-size: 1.3rem;
+  color: var(--danger);
+  margin: 12px 0 4px;
+}
+
+.daily__result--won {
+  color: var(--state-correct);
+}
+
+.daily__streak {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink);
+  margin: 4px 0;
+}
+
+.daily__comeback {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  margin: 10px 0 0;
+}
