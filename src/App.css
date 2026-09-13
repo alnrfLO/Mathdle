@@ -118,7 +118,22 @@
   pointer-events: none;
 }
 
-/* --- Scène de bureau (écrans larges uniquement) --- */
+.calculator__legal-link {
+  display: block;
+  margin: 12px auto 2px;
+  background: none;
+  border: none;
+  color: var(--case-trim);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-decoration: underline;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.calculator__legal-link:hover {
+  opacity: 1;
+}
 @media (min-width: 1024px) {
   .scene {
     flex-direction: row;

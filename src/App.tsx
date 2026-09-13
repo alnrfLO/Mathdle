@@ -13,6 +13,7 @@ import { SubjectMenu } from "./components/SubjectMenu";
 import { PlayModeMenu } from "./components/PlayModeMenu";
 import { DailyScreen } from "./components/DailyScreen";
 import { ScienceDailyScreen } from "./components/ScienceDailyScreen";
+import { LegalNotice } from "./components/LegalNotice";
 import { Keyboard } from "./components/Keyboard";
 import { useMathdle } from "./hooks/useMathdle";
 import { useScience } from "./hooks/useScience";
@@ -38,6 +39,7 @@ function App() {
   const [playMode, setPlayMode] = useState<PlayMode>("menu");
   const [scienceGame, setScienceGame] = useState<ScienceGame>("conversions");
   const [scienceStreak, setScienceStreak] = useState(0);
+  const [showLegal, setShowLegal] = useState(false);
   const onCorrect = () => setScienceStreak((s) => s + 1);
   const onStreakReset = () => setScienceStreak(0);
 
@@ -449,7 +451,13 @@ function App() {
             submitLabel="Vérifier"
           />
         )}
+
+        <button type="button" className="calculator__legal-link" onClick={() => setShowLegal(true)}>
+          Mentions légales
+        </button>
       </div>
+
+      {showLegal && <LegalNotice onClose={() => setShowLegal(false)} />}
 
       {subject !== "menu" && (
         <aside className="desk-note">
