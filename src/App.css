@@ -139,12 +139,12 @@
     flex-direction: row;
     align-items: flex-start;
     justify-content: center;
-    gap: 60px;
+    gap: clamp(60px, 5vw, 120px);
     padding: 70px 40px;
   }
 
   .calculator {
-    max-width: 400px;
+    max-width: clamp(400px, 26vw, 560px);
   }
 
   .screen-only-info {
@@ -153,7 +153,7 @@
 
   .desk-note {
     display: block;
-    width: 260px;
+    width: clamp(260px, 16vw, 380px);
     background: var(--paper-bg);
     color: var(--paper-ink);
     padding: 22px 22px 18px;
